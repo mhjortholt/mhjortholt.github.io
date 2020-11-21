@@ -1,0 +1,73 @@
+body { 
+	text-align: center;
+	color: rgba( 26, 26, 26, 0.9);
+	font-family: 'adobe-garamond-pro', 'Cormorant Garamond', serif;
+	font-size: 16px;
+	background: rgb(248, 246, 248);
+	margin: 0; padding: 0;
+}
+
+h1 { font-size: 40px; font-family: 'proxima-nova', sans-serif; font-weight: 500;}
+
+input[type="range"] {
+	width: 100%;
+}
+
+.slider {
+	margin: 20px 0;
+}
+.slider label { display: block; }
+.checkbox { margin: 20px 0;}
+
+.menu {
+	height: 110px;
+	padding: 20px;
+	text-align: left;
+	vertical-align: middle;
+	position: relative;
+}
+.menu img { height: 88%; }
+.menu #test {
+	position: absolute; right: 10px; top: 30px; color: red; font-size: 30px; font-weight: bold;
+	transform: rotate(45deg);
+}
+
+.container {
+	max-width: 625px;
+	text-align: left;
+	margin: auto;
+	padding: 15px;
+	margin-bottom: 100px;
+
+}
+
+.header-text {
+	text-align: center;
+	margin-bottom: 40px;
+	position: relative;
+}
+.header-text img { position: absolute; left: 20px; top: -20px; width: 130px; }
+.header-text p { font-weight: 600; color: rgba(26, 26, 26, 0.7); }
+
+
+.weekly_result {
+	display: none;
+	margin-top: -10px;
+	margin-bottom: 20px;
+}
+.results p span {
+	font-weight: bold;
+}
+
+
+@media only screen and (max-width: 600px) {
+  .menu {
+  	height: 60px;
+  }
+  .container {
+    width: 90%;
+  }
+  .header-text img { 
+  	position: relative; display: block; width: auto; top: auto; left: auto; margin: auto;
+  }
+}

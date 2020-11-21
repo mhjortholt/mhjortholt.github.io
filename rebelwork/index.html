@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+	<title>Patriks kalkylator</title>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;1,600&display=swap" rel="stylesheet">
+
+	<link rel="stylesheet" href="style.css" />
+	<link rel="stylesheet" href="range.css" />
+</head>
+
+<body>
+
+<div class="menu">
+	<img src="logo.png" />
+	<div id="test">[TEST]</div>
+</div>
+
+<div class="container">
+
+	<div class="header-text">
+		<!--<img src="calculator.png" />-->
+		<h1>Kalkylator</h1>
+		<p>Se hur ditt bolag kommer att lyckas!</p>
+	</div>
+
+	<div>
+		<div>
+			<div class="slider">
+				<label class="sliderLabel">Lön annan anställning:</label>
+				<input id="input-lon_annan_anstallning" type="range" min="0" value="0" max="100000" step="1000" />
+				<div class="range-value" data-suffix=" kr/mån"></div>
+			</div>
+		</div>
+		<div>
+			<label> Timarvode </label>
+			<input type="radio" id="check-timarvode" onchange="toggleVeckoArvode()" checked="checked" name="arvode-typ" 
+				onclick="calculate()" />
+			
+			<label> Veckoarvode </label>
+			<input type="radio" id="check-veckoarvode" onchange="toggleVeckoArvode()" name="arvode-typ" 
+				onclick="calculate()" />
+		</div>
+
+		<div id="monthly_sliders">
+			<div class="slider">
+				<label class="sliderLabel">Timarvode:</label>
+				<input id="input-timarvode" type="range" min="300" value="750" max="1500" step="10" />
+				<div class="range-value" data-suffix=" kr/tim"></div>
+			</div>
+			<div class="slider">
+				<label class="sliderLabel">Antal timmar per år (normalt: 1 750 h):</label>
+				<input id="input-antal_timmar" type="range" min="0" value="1750" max="2500" step="10" />
+				<div class="range-value" data-suffix=" timmar"></div>
+			</div>
+			<div class="slider">
+				<label class="sliderLabel">Önskad bruttolön (rekommenderat: 45 000 kr):</label>
+				<input id="input-onskad_lon_brutto_manad" type="range" min="0" value="45000" max="150000" step="500" />
+				<div class="range-value" data-suffix=" kr/mån"></div>
+			</div>
+		</div>
+
+		<div id="weekly_sliders" style="display: none;">
+			<div class="slider">
+				<label class="sliderLabel">Veckoarvode:</label>
+				<input id="input-veckoarvode" type="range" min="0" value="57000" max="70000" step="500" />
+				<div class="range-value" data-suffix=" kr/vecka"></div>
+			</div>
+			<div class="slider">
+				<label class="sliderLabel">Antal veckor per år (normalt: 45):</label>
+				<input id="input-antal_veckor" type="range" min="0" value="45" max="52" step="1" />
+				<div class="range-value" data-suffix=" veckor"></div>
+			</div>
+			<div class="slider">
+				<label class="sliderLabel">Önskad bruttolön per vecka (rekommenderat: 28 200 kr):</label>
+				<input id="input-onskad_lon_brutto_vecka" type="range" min="0" value="28200" max="60000" step="1s00" />
+				<div class="range-value" data-suffix=" kr/vecka"></div>
+			</div>
+		</div>
+
+		<div>
+			<div class="slider">
+				<label class="sliderLabel">Kostnader per månad (mobil, resor, ersättningar etc):</label>
+				<input id="input-kostnader" type="range" min="0" value="5000" max="15000" step="100" />
+				<div class="range-value" data-suffix=" kr/mån"></div>
+			</div>
+		</div>
+
+		<div>
+			<div class="checkbox">
+				<label>Tjänstepension (4 000 sek/mån)</label>
+				<input type="checkbox" id="check-pension" onclick="calculate()" />
+			</div>
+			<div class="checkbox">
+				<label>Bil (BMW 530e, Lexus NX hybrid etc)</label>
+				<input type="checkbox" id="check-bil" onclick="calculate()" />
+			</div>
+			<div class="checkbox">
+				<label>Jobbar inom R&D, utveckling/forskning?</label>
+				<input type="checkbox" id="check-rnd" onclick="calculate()" />
+			</div>
+		</div>
+	</div>
+
+	<hr />
+
+	<div class="results">
+		<div>
+			<p>Omsättning: <span id="omsattning"></span></p>
+		</div>
+		<div>
+			<p class="monthly_result">Personalkostnader: <span id="personal"></span></p>
+			<p class="weekly_result">Personalkostnader per vecka: <span id="personal_vecka"></span></p>
+		</div>
+		<div>
+			<p class="monthly_result">Kostnader (ink avgift): <span id="kostnader"></span></p>
+			<p class="weekly_result">Kostnader per vecka (ink avgift): <span id="kostnader_vecka"></span></p>
+		</div>
+		<div>
+			<p class="monthly_result">Vinst: <span id="vinst"></span></p>
+			<p class="weekly_result">Vinst per vecka: <span id="vinst_vecka"></span></p>
+		</div>
+	</div>
+
+	<hr />
+
+	<div>
+		<div>
+			<p>Utdelningsmöjlighet (begränsas av lön eller vinst): <span id="utdelningsmojlighet"></span>kr</p>
+		</div>
+
+		<div class="slider">
+			<label class="sliderLabel">Utdelning:</label>
+			<input id="input-utdelning" type="range" min="0" value="100000" max="300000" step="1000" />
+			<div class="range-value" data-suffix=" kr"></div>
+		</div>
+	</div>
+
+	<hr />
+
+	<div class="results">
+		<div>
+			<h2>AB med Rebel Work</h2>
+			<div>
+				<p class="monthly_result">Nettolön inklusive utdelning: <span id="netto_manad"></span></p>
+				<p class="weekly_result">Nettolön inklusive utdelning per vecka: <span id="netto_vecka"></span></p>
+			</div>
+			<div>
+				<p class="monthly_result">Motsvarande bruttolön: <span id="motsvarande_lon_manad"></span></p>
+				<p class="weekly_result">Motsvarande bruttolön per vecka: <span id="motsvarande_lon_vecka"></span></p>
+			</div>
+			<div>
+				<p class="monthly_result">Överskott: <span id="overskott"></span></p>
+				<p class="weekly_result">Överskott per vecka: <span id="overskott_vecka"></span></p>
+			</div>
+		</div>
+	</div>
+
+	<hr />
+
+	<div class="results">
+		<div>
+			<h2>Enskild firma</h2>
+			<p>Om du hade haft enskild firma hade det sett ut så här.</p> 
+			<div>
+				<p class="monthly_result">Nettolön per månad: <span id="netto_enskild_manad"></span></p>
+				<p class="weekly_result">Nettolön per vecka: <span id="netto_enskild_vecka"></span></p>
+			</div>
+			<div>
+				<p class="monthly_result">Motsvarande bruttolön: <span id="motsvarande_lon_enskild_manad"></span></p>
+				<p class="weekly_result">Motsvarande bruttolön per vecka: <span id="motsvarande_lon_enskild_vecka"></span></p>
+			</div>
+		</div>
+	</div>
+
+	<hr />
+
+	<div>
+		Observera att kalkylatorn är något förenklad och menar till att ger en bild av ekonomin och skall därför inte användas för bokföring. Även extremvärderna på lönen kan vara missvisande.
+	</div>
+</div>
+
+<script src="jquery.js"></script>
+<script src="constants.js"></script>
+<script src="calculate.js"></script>
+<script>
+	
+	function updateSlider() {
+		manuallyUpdateSlider($(this));
+	}
+	function manuallyUpdateSlider(slider) {
+		let val = slider.val();
+		let suffix = slider.siblings('.range-value').data('suffix');
+		slider.siblings('.range-value').text(format(val) + suffix);
+	}
+	function format(val) {
+		return Number(val).toLocaleString('sv-SE', { useGrouping: true});
+	}
+	function formatSEK(val) {
+		return Number(val).toLocaleString('sv-SE', {
+			minimumFractionDigits: 2, 
+			maximumFractionDigits: 2, 
+			style: 'currency', 
+			currency: 'SEK', 
+			useGrouping: true
+		});
+	}
+
+	function toggleVeckoArvode() {
+		$('#weekly_sliders').toggle( $('#check-veckoarvode').is(':checked') );
+		$('#monthly_sliders').toggle( $('#check-timarvode').is(':checked') );
+		$('.weekly_result').toggle( $('#check-veckoarvode').is(':checked') );
+	}
+
+	function calculate() {
+		console.log('calculate');
+
+		// get inputs
+		let input = {
+			'MONTHLY': $('#check-timarvode').is(':checked'),
+			'WEEKLY': $('#check-veckoarvode').is(':checked'),
+
+			'lon_annan_anstallning': Number($('#input-lon_annan_anstallning').val()),
+
+			'timarvode': Number($('#input-timarvode').val()),
+			'antal_timmar': Number($('#input-antal_timmar').val()),
+			'onskad_lon_brutto_manad': Number($('#input-onskad_lon_brutto_manad').val()),
+			
+			'veckoarvode': Number($('#input-veckoarvode').val()),
+			'antal_veckor': Number($('#input-antal_veckor').val()),
+			'onskad_lon_brutto_vecka': Number($('#input-onskad_lon_brutto_vecka').val()),
+
+			'kostnader': Number($('#input-kostnader').val()),
+			'pension': $('#check-pension').is(':checked'),
+			'bil': $('#check-bil').is(':checked'),
+			'rnd': $('#check-rnd').is(':checked'),
+			'utdelning': Number($('#input-utdelning').val())
+		};
+		let T2 = Number($('#input-antal_veckor').val());
+
+		// Calculate all
+		let output = calculateValues(input);
+
+		// display results
+		$('#omsattning').text( formatSEK(output.omsattning));
+		$('#personal').text( formatSEK(output.personal));
+		$('#personal_vecka').text( formatSEK(output.personal / T2));
+		$('#kostnader').text( formatSEK(output.kostnader));
+		$('#kostnader_vecka').text( formatSEK(output.kostnader / T2));
+		$('#vinst').text( formatSEK(output.vinst));
+		$('#vinst_vecka').text( formatSEK(output.vinst / T2));
+		$('#utdelningsmojlighet').text( formatSEK(output.utdelningsmojlighet.max));
+
+		$('#input-utdelning').prop({
+            'min': output.utdelningsmojlighet.min,
+            'max': output.utdelningsmojlighet.max
+        });
+        let a = $('#input-utdelning').val();
+        manuallyUpdateSlider($('#input-utdelning'));
+
+        $('#netto_manad').text( formatSEK(output.netto_manad));
+        $('#netto_vecka').text( formatSEK(output.netto_manad * 12 / T2));
+
+        $('#motsvarande_lon_manad').text( formatSEK(output.motsvarande_lon_manad));
+        $('#motsvarande_lon_vecka').text( formatSEK(output.motsvarande_lon_manad * 12 / T2));
+        
+        $('#overskott').text( formatSEK(output.overskott));
+		$('#overskott_vecka').text( formatSEK(output.overskott / T2));
+
+		// Enkild firma
+		$('#netto_enskild_manad').text( formatSEK( output.netto_enskild_manad ));
+		$('#netto_enskild_vecka').text( formatSEK( output.netto_enskild_manad * 12 / T2));
+		$('#motsvarande_lon_enskild_manad').text( formatSEK( output.motsvarande_lon_enskild_manad ));
+		$('#motsvarande_lon_enskild_vecka').text( formatSEK( output.motsvarande_lon_enskild_manad * 12 / T2));
+	}
+
+	$(document).ready(function() {
+		// Hook up sliders
+		$('.slider input').on('input', function() { 
+			manuallyUpdateSlider($(this));
+			calculate();
+		});
+		$('.slider input').on('change', calculate);
+		$('.slider input').each(updateSlider);
+		calculate();
+	});
+
+
+</script>
+</body>
+</html>
