@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+	<title>chart</title>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+
+</head>
+
+<body style="background: #eee;">
+
+
+<h1>Chart</h1>
+	
+<canvas id="chart1" width="300" height="300" style="border: 1px solid black; margin-bottom: 4000;"></canvas>
+<canvas id="chart2" width="200" height="200" style="border: 1px solid black; margin-bottom: 4000;"></canvas>
+<button onclick="changeValues()">Klick</button>
+
+<script src="chart.js"></script>
+<script>
+
+	let canvas1 = document.getElementById('chart1');
+	let canvas2 = document.getElementById('chart2');
+	let data = [
+		{ id: 'a', value: 27, color: 'black' },
+		{ id: 'b', value: 30, color: 'red' },
+		{ id: 'c', value: 23, color: 'blue' },
+		{ id: 'd', value: 10, color: 'green' },
+		{ id: 'e', value: 10, color: 'pink' },
+	];
+	let chart1 = new Chart({
+		canvas: canvas1,
+		data: data
+	});
+
+	let chart2 = new Chart({
+		canvas: canvas2,
+		data: [
+			{ id: 'a', value: 33, color: 'yellow' },
+			{ id: 'b', value: 33, color: 'red' },
+			{ id: 'c', value: 34, color: 'blue' },
+		]
+	});
+
+	function changeValues() {
+		let a = Math.floor(Math.random() * 96) + 1;
+		let b = Math.floor(Math.random() * (97 - a)) + 1;
+		let c = Math.floor(Math.random() * (98 - (a + b))) + 1;
+		let d = Math.floor(Math.random() * (99 - (a + b + c))) + 1;
+		let e = 100 - (a + b + c + d); 
+
+		let new_values = [];
+		new_values.push({ id: 'a', new_value: a });
+		new_values.push({ id: 'b', new_value: b });
+		new_values.push({ id: 'c', new_value: c });
+		new_values.push({ id: 'd', new_value: d });
+		new_values.push({ id: 'e', new_value: e });
+
+		console.log('new values');
+		console.log(a + ', ' + b + ', ' + c + ', ' + d + ', ' + e);
+		console.log(a+b+c+d+e);
+		console.log(new_values);
+
+		chart1.updateValues(new_values);
+	}
+
+</script>
+
+</body>
+</html>

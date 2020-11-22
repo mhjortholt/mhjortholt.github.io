@@ -93,6 +93,7 @@ function calculateValues(input) {
 	let Se2 = (Be-G2)*G7; //statlig_inkomstskatt EJ negativ
 	if (Se2 < 0) {
 		console.error('Statlig inkomstskatt Se2 is negative');
+		Se2 = 0;
 	}
 	let nedsattning_av_egenavgift = Ne = Pe*0.075;
 	if (Ne > 15000) {
@@ -120,7 +121,8 @@ function calculateValues(input) {
 		'netto_enskild_manad': netto_enskild_manad,
 		'motsvarande_lon_manad': motsvarande_lon_manad,
 		'motsvarande_lon_enskild_manad': motsvarande_lon_enskild_manad,
-		'overskott': overskott
+		'overskott': overskott,
+		'rw': RW
 	};
 
 	function calculateRW() {
@@ -169,13 +171,6 @@ function calculateValues(input) {
 
 
 
-function calculateMotsvarandeLon(input) {
 
-	// 
 
-	let output = {
 
-	};
-
-	return output;
-}
