@@ -1,5 +1,6 @@
 let CONSTANTS = new (function() {
 
+	
 	// Stående input, vissa ändras per år
 	this.grundavdrag = this.G1 = 13900;
 	this.grans_statlig = this.G2 = 509300;
