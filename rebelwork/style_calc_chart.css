@@ -47,6 +47,8 @@
 	vertical-align: top;
 	margin-top: 3px;
 }
+
+.legend .item .square.light_green { background: rgb(211,222,160); }
 .legend .item .square.green { background: rgb(171,182,120); }
 .legend .item .square.light_blue { background: rgb(156,198,209); }
 .legend .item .square.sand { background: rgb(250,238,205); }

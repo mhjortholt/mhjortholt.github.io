@@ -31,7 +31,7 @@
 
 		<div class="small_donuts">
 			<div class="chart-holder">
-				<h3>Rebel Work</h3>
+				<h3>AB med Rebel Work</h3>
 				<canvas id="chart_rw_small" width="150" height="150"></canvas>
 			</div>
 			<div class="chart-holder">
@@ -123,11 +123,11 @@
 			<div>
 				<div class="checkbox">
 					<label>Tjänstepension (4 000 sek/mån)</label>
-					<input type="checkbox" id="check-pension" onclick="calculate()" />
+					<input type="checkbox" id="check-pension" onclick="calculate()" checked="checked" />
 				</div>
 				<div class="checkbox">
 					<label>Bil (BMW 530e, Lexus NX hybrid etc)</label>
-					<input type="checkbox" id="check-bil" onclick="calculate()" />
+					<input type="checkbox" id="check-bil" onclick="calculate()" checked="checked" />
 				</div>
 				<div class="checkbox">
 					<label>Jobbar inom R&D, utveckling/forskning?</label>
@@ -222,7 +222,11 @@
 				<div class="legend">
 					<div class="item">
 						<div class="square green"></div>
-						<span>Din del</span>
+						<span>Netto</span>
+					</div>
+					<div class="item">
+						<div class="square light_green"></div>
+						<span>Överskott</span>
 					</div>
 					<div class="item">
 						<div class="square dark_blue"></div>
@@ -244,7 +248,7 @@
 				<div class="legend">
 					<div class="item">
 						<div class="square green"></div>
-						<span>Din del</span>
+						<span>Netto</span>
 					</div>
 					<div class="item">
 						<div class="square dark_blue"></div>
@@ -279,8 +283,8 @@
 	}
 	function formatSEK(val) {
 		return Number(val).toLocaleString('sv-SE', {
-			minimumFractionDigits: 2, 
-			maximumFractionDigits: 2, 
+			minimumFractionDigits: 0, 
+			maximumFractionDigits: 0, 
 			style: 'currency', 
 			currency: 'SEK', 
 			useGrouping: true
@@ -370,17 +374,19 @@
 
 	// CHARTS
 	
+	let light_green = 'rgb(211,222,160)';
 	let green = 'rgb(171,182,120)';
 	let light_blue = 'rgb(156,198,209)';
-	let sand = 'rgb(250,238,205)';
 	let blue = 'rgb(78,133,147)';
 	let dark_blue = 'rgb(52,94,109)';
+	let sand = 'rgb(250,238,205)';
 	let gray = 'rgb(208, 206, 206)';
 	let data1 = [
 		{ id: 'kostnader', value: 4, color: gray },
 		{ id: 'rw', value: 2, color: light_blue },
 		{ id: 'skatt', value: 39, color: dark_blue },
-		{ id: 'din', value: 55, color: green },
+		{ id: 'netto', value: 54, color: green },
+		{ id: 'overskott', value: 1, color: light_green },
 	];
 	let chart_rw = new Chart({
 		canvas: document.getElementById('chart_rw'),
@@ -395,7 +401,7 @@
 	let data2 = [
 		{ id: 'kostnader', value: 4, color: gray },
 		{ id: 'skatt', value: 55, color: dark_blue },
-		{ id: 'din', value: 41, color: green },
+		{ id: 'netto', value: 41, color: green },
 	];
 	let chart_enskild = new Chart({
 		canvas: document.getElementById('chart_enskild'),
@@ -410,46 +416,43 @@
 	function updateCharts(input) {
 		console.log('Update charts');
 
-		let kostnader = input.kostnader;
-
-		let total = input.kostnader + input.skatt + input.netto_manad*12 + input.overskott + input.rw;
-		let k = input.kostnader / total *100;
-		let s = input.skatt / total * 100;
-		let n = (input.netto_manad*12 + input.overskott) / total * 100;
+		let total = input.kostnad_donut + input.total_skatt_donut + input.netto_donut + input.overskott + input.rw;
+		
+		let kostnader = input.kostnad_donut / total * 100;
 		let rw = input.rw / total * 100;
+		let skatt = input.total_skatt_donut / total * 100;
+		let netto = input.netto_donut / total * 100;
+		let overskott = input.overskott / total * 100;
 
 		chart_rw.updateValues([
-			{ id: 'kostnader', new_value: k },
+			{ id: 'kostnader', new_value: kostnader },
 			{ id: 'rw', new_value: rw },
-			{ id: 'skatt', new_value: s },
-			{ id: 'din', new_value: n },
+			{ id: 'skatt', new_value: skatt },
+			{ id: 'netto', new_value: netto },
+			{ id: 'overskott', new_value: overskott },
 		]);
 		chart_rw_small.updateValues([
-			{ id: 'kostnader', new_value: k },
+			{ id: 'kostnader', new_value: kostnader },
 			{ id: 'rw', new_value: rw },
-			{ id: 'skatt', new_value: s },
-			{ id: 'din', new_value: n },
+			{ id: 'skatt', new_value: skatt },
+			{ id: 'netto', new_value: netto },
+			{ id: 'overskott', new_value: overskott },
 		]);
 
+		let total_enskild = input.kostnader_enskild + input.skatt_enskild + (input.netto_enskild_manad * 12);
+		let kostnader_enskild = input.kostnader_enskild / total_enskild * 100;
+		let skatt_enskild = input.skatt_enskild / total_enskild * 100;
+		let netto_enskild = input.netto_enskild_manad * 12 / total_enskild * 100;
 
-		let skatt_enskild = input.skatt_enskild;
-		let netto_enskild = input.netto_enskild_manad * 12;
-		let total_enskild = kostnader + skatt_enskild + netto_enskild;
-		let ke = kostnader / total_enskild * 100;
-		let se = skatt_enskild / total_enskild * 100;
-		let ne = netto_enskild / total_enskild * 100;
-		/*console.log(ke);
-		console.log(se);
-		console.log(ne);*/
 		chart_enskild.updateValues([
-			{ id: 'kostnader', new_value: ke },
-			{ id: 'skatt', new_value: se },
-			{ id: 'din', new_value: ne },
+			{ id: 'kostnader', new_value: kostnader_enskild },
+			{ id: 'skatt', new_value: skatt_enskild },
+			{ id: 'netto', new_value: netto_enskild },
 		]);
 		chart_enskild_small.updateValues([
-			{ id: 'kostnader', new_value: ke },
-			{ id: 'skatt', new_value: se },
-			{ id: 'din', new_value: ne },
+			{ id: 'kostnader', new_value: kostnader_enskild },
+			{ id: 'skatt', new_value: skatt_enskild },
+			{ id: 'netto', new_value: netto_enskild },
 		]);
 
 		/*

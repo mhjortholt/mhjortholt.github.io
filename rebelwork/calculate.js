@@ -35,9 +35,6 @@ function calculateValues(input) {
 		statlig_inkomstskatt = A3 = 0;
 	}
 
-	if (statlig_inkomstskatt < 0) {
-		console.error('Statlig inkomstskatt can\'t be negative: ' + statlig_inkomstskatt);
-	}
 	let jobbskatteavdrag = J1 = getJobbskatteavdragFromBrutto(Ttot);
 
 	let kommunalskatt_L2 = A4 = L2*12*G6;
@@ -56,9 +53,13 @@ function calculateValues(input) {
 	let RW = calculateRW();
 	let kostnader_personal = R1 = Ltot+P1*12;
 	let kostnader = R2 = K1*12+B2*12+RW;
+	let kostnad_donut = R21 = R2 - RW;
 
 	let vinst = V1 = O1-R1-R2;
-	let skatt = S1 = V1*0.22; // Double check with Putte TODO change 0.22 -> G8
+	let skatt = S1 = V1*G8;
+	if (S1 < 0) {
+		S1 = 0; // ej negativ vinstskatt (kolla med Putte)
+	}
 	let Vt = V1-S1;
 
 // -----------------------------------------------------------------
@@ -66,6 +67,7 @@ function calculateValues(input) {
 	let UH = 6*G10+6*G10*0.05;
 
 	let utdelningsmojlighet = U1 = 6*(L1+B1); // Huvudregeln
+	let utdelningsmojlighet_vecka = U1v = T2/2*L1 + 6*B1; // Ny
 	if (UH > Tt) { // Schablonregeln
 		utdelningsmojlighet = U1 = G11;
 	}
@@ -77,22 +79,24 @@ function calculateValues(input) {
 
 	let netto = N1 = U2-U2*G16;
 	let netto_manad = N2 = (Ntot+N1)/12; // Netto per månad
+	let netto_donut = NTT = N1+Ntot;
 	let motsvarande_lon_manad = LM = calculateMotsvarandeLon();
 	let overskott = R3 = Vt-U2;
+	let total_skatt_donut = Stot = A1+A2+A3+A4-J1+Bt+Pt+S1+U2-N1;
 
 
 // -----------------------------------------------------------------
 // Enskild firma
 // -----------------------------------------------------------------
 
+	let kostnadder_enskild = Re = R21+P1*12+G18;
 	let skatter_for_bil_och_pension = Ke = Pt+Bt;
 	let La = L2*12; // Lön annan anställning
-	let personal_enskild = Pe = O1-R2-Ke;
+	let personal_enskild = Pe = O1-Re; // old: O1-R2-Ke;
 	let beskattningsbar_forvarvsinkomst = Be = Pe*0.75-G1+La;
 	let kommunal_inkomstskatt = Se1 = Be*G6;
 	let Se2 = (Be-G2)*G7; //statlig_inkomstskatt EJ negativ
 	if (Se2 < 0) {
-		console.error('Statlig inkomstskatt Se2 is negative');
 		Se2 = 0;
 	}
 	let nedsattning_av_egenavgift = Ne = Pe*0.075;
@@ -101,8 +105,10 @@ function calculateValues(input) {
 	}
 	let egenavgifter = Ee = Be*G17-Ne;
 	let jobbskatteavdrag_enskild = Je = getJobbskatteavdragFromBrutto(Be);
-	let skatt_enskild = Set_ = Se1+Se2+Ee-Je;
+	let skatt_enskild = Set_ = Se1+Se2+Ee-Je+Ke;
 	let netto_enskild = Net = Pe+La-Set_;
+
+	let kostnad_enskild_donut = R21+G18; // ????
 
 	let motsvarande_lon_enskild_manad = calculateMotsvarandeLonEnskild();
 	let netto_enskild_manad = Net12 = Net/12;
@@ -113,16 +119,21 @@ function calculateValues(input) {
 		'omsattning': omsattning,
 		'personal': kostnader_personal,
 		'kostnader': kostnader,
+		'kostnader_enskild': kostnad_enskild_donut,
 		'vinst': vinst,
 		'skatt': skatt,
 		'skatt_enskild': skatt_enskild,
 		'utdelningsmojlighet': { min: 0, max: utdelningsmojlighet },
+
 		'netto_manad': netto_manad,
 		'netto_enskild_manad': netto_enskild_manad,
 		'motsvarande_lon_manad': motsvarande_lon_manad,
 		'motsvarande_lon_enskild_manad': motsvarande_lon_enskild_manad,
 		'overskott': overskott,
-		'rw': RW
+		'rw': RW,
+		'kostnad_donut': kostnad_donut,
+		'netto_donut': netto_donut,
+		'total_skatt_donut': total_skatt_donut,
 	};
 
 	function calculateRW() {

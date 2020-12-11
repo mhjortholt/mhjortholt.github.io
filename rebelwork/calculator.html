@@ -91,11 +91,11 @@
 		<div>
 			<div class="checkbox">
 				<label>Tjänstepension (4 000 sek/mån)</label>
-				<input type="checkbox" id="check-pension" onclick="calculate()" />
+				<input type="checkbox" id="check-pension" onclick="calculate()" checked="checked" />
 			</div>
 			<div class="checkbox">
 				<label>Bil (BMW 530e, Lexus NX hybrid etc)</label>
-				<input type="checkbox" id="check-bil" onclick="calculate()" />
+				<input type="checkbox" id="check-bil" onclick="calculate()" checked="checked" />
 			</div>
 			<div class="checkbox">
 				<label>Jobbar inom R&D, utveckling/forskning?</label>
@@ -200,8 +200,8 @@
 	}
 	function formatSEK(val) {
 		return Number(val).toLocaleString('sv-SE', {
-			minimumFractionDigits: 2, 
-			maximumFractionDigits: 2, 
+			minimumFractionDigits: 0, 
+			maximumFractionDigits: 0, 
 			style: 'currency', 
 			currency: 'SEK', 
 			useGrouping: true

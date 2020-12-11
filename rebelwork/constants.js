@@ -18,6 +18,7 @@ let CONSTANTS = new (function() {
 	this.grans_rw_rorlig_over = this.G15 = 1200000;
 	this.skatt_utdelning = this.G16 = 0.20; // %
 	this.G17 = 0.2897; // %
+	this.G18 = 15000; // Ett värde som motsvarar typ enklare försäkring, bokföring etc ink i RW
 
 })();
 
