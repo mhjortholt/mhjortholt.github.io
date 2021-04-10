@@ -34,10 +34,11 @@
 				<h3>AB med Rebel Work</h3>
 				<canvas id="chart_rw_small" width="150" height="150"></canvas>
 			</div>
+			<!--
 			<div class="chart-holder">
 				<h3>Enskild firma</h3>
 				<canvas id="chart_enskild_small" width="150" height="150"></canvas>
-			</div>
+			</div>-->
 			<div class="legend">
 					<div class="item">
 						<div class="square green"></div>
@@ -59,11 +60,11 @@
 		</div>
 
 		<div>
-			<div>
+			<div style="display: none;">
 				<div class="slider">
 					<label class="sliderLabel">Lön annan anställning:</label>
-					<input id="input-lon_annan_anstallning" type="range" min="0" value="0" max="100000" step="1000" />
 					<div class="range-value" data-suffix=" kr/mån"></div>
+					<input id="input-lon_annan_anstallning" type="range" min="0" value="0" max="100000" step="1000" />
 				</div>
 			</div>
 			<div>
@@ -78,56 +79,57 @@
 
 			<div id="monthly_sliders">
 				<div class="slider">
-					<label class="sliderLabel">Timarvode:</label>
-					<input id="input-timarvode" type="range" min="300" value="750" max="1500" step="10" />
+					<label class="sliderLabel">Timarvode: </label>
 					<div class="range-value" data-suffix=" kr/tim"></div>
+					<input id="input-timarvode" type="range" min="300" value="750" max="1500" step="10" />
 				</div>
 				<div class="slider">
-					<label class="sliderLabel">Antal timmar per år (normalt: 1 750 h):</label>
-					<input id="input-antal_timmar" type="range" min="0" value="1750" max="2500" step="10" />
+					<label class="sliderLabel">Antal timmar per år:</label>
 					<div class="range-value" data-suffix=" timmar"></div>
+					<span id="belaggning"> (100% beläggning)</span>
+					<input id="input-antal_timmar" type="range" min="0" value="1750" max="2500" step="10" />
 				</div>
 				<div class="slider">
 					<label class="sliderLabel">Önskad bruttolön (rekommenderat: 45 000 kr):</label>
-					<input id="input-onskad_lon_brutto_manad" type="range" min="0" value="45000" max="150000" step="500" />
 					<div class="range-value" data-suffix=" kr/mån"></div>
+					<input id="input-onskad_lon_brutto_manad" type="range" min="0" value="45000" max="150000" step="500" />
 				</div>
 			</div>
 
 			<div id="weekly_sliders" style="display: none;">
 				<div class="slider">
 					<label class="sliderLabel">Veckoarvode:</label>
-					<input id="input-veckoarvode" type="range" min="0" value="57000" max="70000" step="500" />
 					<div class="range-value" data-suffix=" kr/vecka"></div>
+					<input id="input-veckoarvode" type="range" min="0" value="57000" max="70000" step="500" />
 				</div>
 				<div class="slider">
-					<label class="sliderLabel">Antal veckor per år (normalt: 45):</label>
-					<input id="input-antal_veckor" type="range" min="0" value="45" max="52" step="1" />
+					<label class="sliderLabel">Antal veckor per år:</label>
 					<div class="range-value" data-suffix=" veckor"></div>
+					<input id="input-antal_veckor" type="range" min="0" value="45" max="52" step="1" />
 				</div>
 				<div class="slider">
 					<label class="sliderLabel">Önskad bruttolön per vecka (rekommenderat: 28 200 kr):</label>
-					<input id="input-onskad_lon_brutto_vecka" type="range" min="0" value="28200" max="60000" step="100" />
 					<div class="range-value" data-suffix=" kr/vecka"></div>
+					<input id="input-onskad_lon_brutto_vecka" type="range" min="0" value="28200" max="60000" step="100" />
 				</div>
 			</div>
 
 			<div>
 				<div class="slider">
 					<label class="sliderLabel">Kostnader per månad (mobil, resor, ersättningar etc):</label>
-					<input id="input-kostnader" type="range" min="0" value="5000" max="15000" step="100" />
 					<div class="range-value" data-suffix=" kr/mån"></div>
+					<input id="input-kostnader" type="range" min="0" value="5000" max="15000" step="100" />
 				</div>
 			</div>
 
 			<div>
 				<div class="checkbox">
 					<label>Tjänstepension (4 000 sek/mån)</label>
-					<input type="checkbox" id="check-pension" onclick="calculate()" checked="checked" />
+					<input type="checkbox" id="check-pension" onclick="calculate()" />
 				</div>
 				<div class="checkbox">
 					<label>Bil (BMW 530e, Lexus NX hybrid etc)</label>
-					<input type="checkbox" id="check-bil" onclick="calculate()" checked="checked" />
+					<input type="checkbox" id="check-bil" onclick="calculate()" />
 				</div>
 				<div class="checkbox">
 					<label>Jobbar inom R&D, utveckling/forskning?</label>
@@ -160,13 +162,13 @@
 
 		<div>
 			<div>
-				<p>Utdelningsmöjlighet (begränsas av lön eller vinst): <span id="utdelningsmojlighet"></span>kr</p>
+				<p>Utdelningsmöjlighet (begränsas av lön eller vinst): <span id="utdelningsmojlighet"></span></p>
 			</div>
 
 			<div class="slider">
 				<label class="sliderLabel">Utdelning:</label>
-				<input id="input-utdelning" type="range" min="0" value="100000" max="300000" step="1000" />
 				<div class="range-value" data-suffix=" kr"></div>
+				<input id="input-utdelning" type="range" min="0" value="300000" max="300000" step="1000" />
 			</div>
 		</div>
 
@@ -188,10 +190,12 @@
 					<p class="weekly_result">Överskott per vecka: <span id="overskott_vecka"></span></p>
 				</div>
 			</div>
+			<!--<button onclick="optimize()">Optimera</button>-->
 		</div>
 
 		<hr />
 
+		<!--
 		<div class="results">
 			<div>
 				<h2>Enskild firma</h2>
@@ -208,6 +212,7 @@
 		</div>
 
 		<hr />
+		-->
 
 		<div>
 			Observera att kalkylatorn är något förenklad och menar till att ger en bild av ekonomin och skall därför inte användas för bokföring. Även extremvärderna på lönen kan vara missvisande.
@@ -240,8 +245,9 @@
 						<div class="square light_blue"></div>
 						<span>Avgift bolaget</span>
 					</div>
-				</div>
+				</div>				
 			</div>
+			<!--
 			<div class="chart">
 				<h3>Enskild firma</h3>
 				<canvas id="chart_enskild" width="240" height="240"></canvas>
@@ -260,6 +266,7 @@
 					</div>
 				</div>
 			</div>
+			-->
 		</div>
 	</div>
 </div>
@@ -269,7 +276,49 @@
 <script src="calculate.js"></script>
 <script src="chart.js"></script>
 <script>
-	
+
+	$(document).ready(function() {
+		// Hook up sliders
+		$('.slider input').on('input', function() { 
+			manuallyUpdateSlider($(this));
+			//calculate();
+		});
+		$('#input-antal_timmar').on('input', function() {
+			let h = $(this).val();
+			$('#belaggning').html(' (' + Math.round(h / 1750 * 100) + '% beläggning)');
+		});
+		$('.slider input').on('change', calculate);
+		$('.slider input').each(updateSlider);
+		calculate();
+	});
+
+	function optimize() {
+		console.log('Optimizing..');
+		
+
+		let utdelningsmojlighet = 0;
+		let result = { max: 0 };
+		for (let lon = 0; lon < 150000; lon += 1000) {
+			
+			let input = getInput();
+			input.timarvode = lon;
+			
+			input.utdelning = utdelningsmojlighet;
+
+			let output = calculateValues(input);
+
+			let v = output.netto_donut;
+			if(v > result.max && utdelningsmojlighet <= output.utdelningsmojlighet.max) {
+				result.max = v;
+				result.lon = lon;
+				result.utdelning = input.utdelning;
+			}
+			utdelningsmojlighet = output.utdelningsmojlighet.max;
+		
+		}
+		console.log(result);
+	}
+
 	function updateSlider() {
 		manuallyUpdateSlider($(this));
 	}
@@ -297,10 +346,7 @@
 		$('.weekly_result').toggle( $('#check-veckoarvode').is(':checked') );
 	}
 
-	function calculate() {
-		console.log('calculate');
-
-		// get inputs
+	function getInput() {
 		let input = {
 			'MONTHLY': $('#check-timarvode').is(':checked'),
 			'WEEKLY': $('#check-veckoarvode').is(':checked'),
@@ -321,6 +367,15 @@
 			'rnd': $('#check-rnd').is(':checked'),
 			'utdelning': Number($('#input-utdelning').val())
 		};
+		return input;
+	}
+
+	function calculate() {
+		console.log('calculate');
+
+		// get inputs
+		let input = getInput();
+
 		let T2 = Number($('#input-antal_veckor').val());
 
 		// Calculate all
@@ -361,17 +416,6 @@
 		updateCharts(output);
 	}
 
-	$(document).ready(function() {
-		// Hook up sliders
-		$('.slider input').on('input', function() { 
-			manuallyUpdateSlider($(this));
-			//calculate();
-		});
-		$('.slider input').on('change', calculate);
-		$('.slider input').each(updateSlider);
-		calculate();
-	});
-
 	// CHARTS
 	
 	let light_green = 'rgb(211,222,160)';
@@ -381,6 +425,7 @@
 	let dark_blue = 'rgb(52,94,109)';
 	let sand = 'rgb(250,238,205)';
 	let gray = 'rgb(208, 206, 206)';
+	let red = 'rgb(235, 94, 84)';
 	let data1 = [
 		{ id: 'kostnader', value: 4, color: gray },
 		{ id: 'rw', value: 2, color: light_blue },
@@ -403,6 +448,7 @@
 		{ id: 'skatt', value: 55, color: dark_blue },
 		{ id: 'netto', value: 41, color: green },
 	];
+	/*
 	let chart_enskild = new Chart({
 		canvas: document.getElementById('chart_enskild'),
 		data: data2,
@@ -411,38 +457,42 @@
 	let chart_enskild_small = new Chart({
 		canvas: document.getElementById('chart_enskild_small'),
 		data: data2,
-	});
+	});*/
 
 	function updateCharts(input) {
 		console.log('Update charts');
 
-		let total = input.kostnad_donut + input.total_skatt_donut + input.netto_donut + input.overskott + input.rw;
+		let total = input.kostnad_donut + input.total_skatt_donut + input.netto_donut + Math.abs(input.overskott) + input.rw;
 		
 		let kostnader = input.kostnad_donut / total * 100;
 		let rw = input.rw / total * 100;
 		let skatt = input.total_skatt_donut / total * 100;
 		let netto = input.netto_donut / total * 100;
-		let overskott = input.overskott / total * 100;
+		let overskott = Math.abs(input.overskott) / total * 100;
 
 		chart_rw.updateValues([
-			{ id: 'kostnader', new_value: kostnader },
-			{ id: 'rw', new_value: rw },
-			{ id: 'skatt', new_value: skatt },
-			{ id: 'netto', new_value: netto },
-			{ id: 'overskott', new_value: overskott },
+			{ id: 'kostnader', new_value: kostnader, tooltip: formatSEK(input.kostnad_donut) },
+			{ id: 'rw', new_value: rw, tooltip: formatSEK(input.rw) },
+			{ id: 'skatt', new_value: skatt, tooltip: formatSEK(input.total_skatt_donut) },
+			{ id: 'netto', new_value: netto, tooltip: formatSEK(input.netto_donut) },
+			{ id: 'overskott', new_value: overskott, 
+								color: input.overskott > 0 ? light_green : red, 
+								tooltip: formatSEK(input.overskott) },
 		]);
 		chart_rw_small.updateValues([
 			{ id: 'kostnader', new_value: kostnader },
 			{ id: 'rw', new_value: rw },
 			{ id: 'skatt', new_value: skatt },
 			{ id: 'netto', new_value: netto },
-			{ id: 'overskott', new_value: overskott },
+			{ id: 'overskott', new_value: overskott, color: input.overskott > 0 ? light_green : red },
 		]);
 
+/*
 		let total_enskild = input.kostnader_enskild + input.skatt_enskild + (input.netto_enskild_manad * 12);
 		let kostnader_enskild = input.kostnader_enskild / total_enskild * 100;
 		let skatt_enskild = input.skatt_enskild / total_enskild * 100;
 		let netto_enskild = input.netto_enskild_manad * 12 / total_enskild * 100;
+
 
 		chart_enskild.updateValues([
 			{ id: 'kostnader', new_value: kostnader_enskild },
@@ -454,7 +504,7 @@
 			{ id: 'skatt', new_value: skatt_enskild },
 			{ id: 'netto', new_value: netto_enskild },
 		]);
-
+*/
 		/*
 		let a = Math.floor(Math.random() * 96) + 1;
 		let b = Math.floor(Math.random() * (97 - a)) + 1;

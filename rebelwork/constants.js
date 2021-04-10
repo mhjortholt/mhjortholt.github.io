@@ -1,8 +1,8 @@
 let CONSTANTS = new (function() {
 
 	// Stående input, vissa ändras per år
-	this.grundavdrag = this.G1 = 13900;
-	this.grans_statlig = this.G2 = 509300;
+	this.grundavdrag = this.G1 = 14000;
+	this.grans_statlig = this.G2 = 523200;
 	this.G3 = this.G1 + this.G2;
 	this.G4 = this.G3 / 12;
 	this.ag = this.G5 = 0.3142; // %
@@ -10,17 +10,32 @@ let CONSTANTS = new (function() {
 	this.statlig_inkomstskatt = this.G7 = 0.20; // %
 	this.vinstskatt = this.G8 = 0.2060; // %
 	this.skatt_pension = this.G9 = 0.2426; // %
-	this.ibb = this.G10 = 66800;
-	this.schablon = this.G11 = 177100;
-	this.avgift_rw_bas = this.G12 = 899;
-	this.avgift_rw_rorlig = this.G13 = 0.0249; // %
-	this.grans_rw_rorlig_under = this.G14 = 200000;
+	this.ibb = this.G10 = 68200;
+	this.schablon = this.G11 = 183700;
+	this.avgift_rw_bas = this.G12 = 499;
+	//this.avgift_rw_rorlig = this.G13 = 0.0249; // %
+	//this.grans_rw_rorlig_under = this.G14 = 200000;
 	this.grans_rw_rorlig_over = this.G15 = 1200000;
 	this.skatt_utdelning = this.G16 = 0.20; // %
 	this.G17 = 0.2897; // %
 	this.G18 = 15000; // Ett värde som motsvarar typ enklare försäkring, bokföring etc ink i RW
 
 })();
+
+let avgift_rw_rorlig_tabell = [
+	[100000, 0.045],
+	[200000, 0.04],
+	[300000, 0.035],
+	[400000, 0.03],
+	[500000, 0.025],
+	[600000, 0.02],
+	[700000, 0.018],
+	[800000, 0.016],
+	[900000, 0.014],
+	[1000000, 0.012],
+	[1100000, 0.01],
+	[1200000, 0.008]
+];
 
 let jobbskatteavdragTabell = [
 	{ brutto:  100000, netto:  74200, avdrag: 10004 },

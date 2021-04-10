@@ -27,7 +27,7 @@ function calculateValues(input) {
 	let total_lon_bolaget = Tt = L1*12*M+L1*T2*V;
 	let total_lon_tot = Ttot = Tt+L2*12;
 	
-	let arbetsgivaravgift = A1 = Tt*(G5-F1); // ??? hmmm
+	let arbetsgivaravgift = A1 = Tt*(G5-F1);
 	let kommunalskatt = A2 = (Tt-G1)*G6;
 	let statlig_inkomstskatt = A3 = (Ttot-G3)*G7; // EJ NEGATIV
 	// TODO revise with Putte
@@ -43,7 +43,8 @@ function calculateValues(input) {
 	let lon_netto_Ttot = Ntot = L2*12-A4+Nt;
 
 	let pensionkostnad_skatt = Pt = P1*G9*12;
-	let skatt_forman_bil = Bt = B1*(G5+G6)*12;
+	let skatt_forman_bil = Bt = B1*(G5+G6)*12+A4;
+	let statlig_skatt_bil = Bs = G7*(Ttot+B1*12-G3)-A3; // TODO UNUSED ATM (A4)
 
 	let lonekostnader = Ltot = Tt+A1+Pt+Bt;
 
@@ -58,7 +59,7 @@ function calculateValues(input) {
 	let vinst = V1 = O1-R1-R2;
 	let skatt = S1 = V1*G8;
 	if (S1 < 0) {
-		S1 = 0; // ej negativ vinstskatt (kolla med Putte)
+		S1 = 0; // ej negativ vinstskatt
 	}
 	let Vt = V1-S1;
 
@@ -67,12 +68,22 @@ function calculateValues(input) {
 	let UH = 6*G10+6*G10*0.05;
 
 	let utdelningsmojlighet = U1 = 6*(L1+B1); // Huvudregeln
-	let utdelningsmojlighet_vecka = U1v = T2/2*L1 + 6*B1; // Ny
+	let utdelningsmojlighet_vecka = U1v = T2/2*L1 + 6*B1;
+
+	if (input.WEEKLY) {
+		utdelningsmojlighet = U1 = U1v;
+	}
+
 	if (UH > Tt) { // Schablonregeln
 		utdelningsmojlighet = U1 = G11;
 	}
 	if (U1 > Vt) {
-		console.error('U1 (utdelningsmöjlighet) is bigger than Vt');
+		console.log('U1 (utdelningsmöjlighet) is bigger than Vt');
+		utdelningsmojlighet = U1 = Vt;
+		if (U1 < 0) {
+			utdelningsmojlighet = U1 = 0;
+		}
+		U2 = Math.floor(Math.min(U1, U2) / 1000) * 1000;
 	}
 
 // -----------------------------------------------------------------
@@ -137,14 +148,21 @@ function calculateValues(input) {
 	};
 
 	function calculateRW() {
-		let diff = O1-G14;
-		if ( diff < 0) {
-			return G12*12;
-		} else if (diff < 1000000) {
-			return G12*12+G13*diff;
-		} else {
-			return G12*12+G13*(G15-G14);
+		let grund = G12*12;
+		let rorlig = 0;
+		let prev = 0;
+		for( let i = 0; i < avgift_rw_rorlig_tabell.length; i++) {
+  			let value = avgift_rw_rorlig_tabell[i];
+  			if(O1 > value[0]) {
+  				rorlig += (value[0] - prev) * value[1];
+  				prev = value[0];
+  			} else {
+  				rorlig += (O1 - prev) * value[1];
+  				break;
+  			}
 		}
+
+		return grund + rorlig;
 	}
 	function calculateMotsvarandeLon() {
 		let tabellvarde_jobbskatteavdrag = W1 = N2*12-G1*G6;

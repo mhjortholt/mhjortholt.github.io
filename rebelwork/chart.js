@@ -7,7 +7,7 @@ let Chart = function(config) {
 	// X Adjustable width of donut
 	// Fix linebreak when non swuare canvas
 	// Change hat highlight solution
-	// Tooltips or similar
+	// X Tooltips or similar
 	// Clear values / reset
 	// Remove value
 
@@ -26,6 +26,20 @@ let Chart = function(config) {
 		console.error('No canvas object specified');
 	}
 	let ctx = canvas.getContext('2d');
+
+	// tooltip
+	const tooltipObject = document.createElement('div');
+	// TODO remove some of these CSS properties
+	tooltipObject.style.background = '#333';
+	tooltipObject.style.color = '#fff';
+	tooltipObject.style.display = 'inline-block';
+	tooltipObject.style.position = 'fixed';
+	tooltipObject.style.pointerEvents = 'none';
+	tooltipObject.style.display = 'none';
+	tooltipObject.style.padding = '5px';
+	tooltipObject.style.borderRadius = '3px';
+	document.body.appendChild(tooltipObject);
+
 
 	function radius() {
 		if (RADIUS) {
@@ -136,7 +150,8 @@ let Chart = function(config) {
 			color: config.data[i].color, 
 			value: 0,
 			new_value: config.data[i].value * 3.6,
-			id: config.data[i].id
+			id: config.data[i].id,
+			tooltip: config.data[i].tooltip,
 		}
 	}
 	animate(); // START
@@ -173,14 +188,32 @@ let Chart = function(config) {
 				if (angle > distance && angle < data[i].value + distance) {
 					draw(i);
 					highlight = i;
+					tooltip.show(data[i].tooltip, e);
 					break;
 				}
 				distance += data[i].value;
 			}
 		} else {
-		canvas.style.cursor = 'default';
-		if (highlight !== undefined) draw();
+			canvas.style.cursor = 'default';
+			if (highlight !== undefined) draw();
 			highlight = undefined;
+			tooltip.hide();
 		}
 	});
+
+	let tooltip = {
+		show: function(val, mouseEvent) {
+			if(val) {
+				tooltipObject.style.top = (mouseEvent.clientY - 10) +'px';
+				tooltipObject.style.left = (mouseEvent.clientX + 15) +'px';
+				tooltipObject.innerHTML = val;
+				tooltipObject.style.display = 'inline-block';
+			} else {
+				tooltip.hide();
+			}
+		},
+		hide: function() {
+			tooltipObject.style.display = 'none';
+		}
+	};
 }
