@@ -16,7 +16,7 @@ input[type="range"] {
 .slider {
 	margin: 20px 0;
 }
-.slider label { display: block; }
+.slider label { display: inline-block; }
 .checkbox { margin: 20px 0;}
 
 .menu {
@@ -58,6 +58,9 @@ input[type="range"] {
 	font-weight: bold;
 }
 
+.range-value {
+	display: inline-block;
+}
 
 @media only screen and (max-width: 600px) {
   .menu {
