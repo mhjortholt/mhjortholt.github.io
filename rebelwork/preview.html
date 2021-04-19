@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Calculator preview</title>
+	<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;1,600&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="https://mhjortholt.github.io/rebelwork/css/old_style.css" />
+	<link rel="stylesheet" href="https://mhjortholt.github.io/rebelwork/css/style_calc_chart.css" />
+	<link rel="stylesheet" href="https://mhjortholt.github.io/rebelwork/css/range.css" />
+</head>
+
+<body>
+
+<div class="flex-holder dashed">
+	<div class="container">
+
+		<div>
+			<div id="monthly_sliders">
+				<div class="slider">
+					<label class="sliderLabel">Timarvode: </label>
+					<div class="range-value" data-suffix=" kr/tim"></div>
+					<input id="input-timarvode" type="range" min="300" value="750" max="1500" step="10" />
+				</div>
+				<div class="slider">
+					<label class="sliderLabel">Antal timmar per år:</label>
+					<div class="range-value" data-suffix=" timmar"></div>
+					<span id="belaggning"> (100% beläggning)</span>
+					<input id="input-antal_timmar" type="range" min="0" value="1750" max="2500" step="10" />
+				</div>
+				<div class="slider">
+					<label class="sliderLabel">Önskad bruttolön (rekommenderat: 45 000 kr):</label>
+					<div class="range-value" data-suffix=" kr/mån"></div>
+					<input id="input-onskad_lon_brutto_manad" type="range" min="0" value="45000" max="150000" step="500" />
+				</div>
+			</div>
+
+			<div>
+				<p>Kostnader per månad (mobil, resor, ersättningar etc): 5000 kr</p>
+			</div>
+
+			<hr />
+
+			<div>
+				<div>
+					<p>Utdelningsmöjlighet (begränsas av lön eller vinst): <span id="utdelningsmojlighet"></span></p>
+				</div>
+
+				<div class="slider">
+					<label class="sliderLabel">Utdelning:</label>
+					<div class="range-value" data-suffix=" kr"></div>
+					<input id="input-utdelning" type="range" min="0" value="300000" max="300000" step="1000" />
+				</div>
+			</div>
+		</div>
+
+		<hr />
+
+		<div class="results">
+			<div>
+				<h2>AB med Rebel Work</h2>
+				<div>
+					<p class="monthly_result">Motsvarande bruttolön: <span id="motsvarande_lon_manad"></span></p>
+				</div>
+				<div>
+					<p class="monthly_result">Överskott: <span id="overskott"></span></p>
+				</div>
+			</div>
+			
+		</div>
+
+		<hr />
+
+		<div>
+			Observera att kalkylatorn är något förenklad och menar till att ger en bild av ekonomin och skall därför inte användas för bokföring. Även extremvärderna på lönen kan vara missvisande.
+		</div>
+	</div>
+
+
+</div>
+
+<script src="https://mhjortholt.github.io/rebelwork/js/jquery.js"></script>
+<script src="https://mhjortholt.github.io/rebelwork/js/constants.js"></script>
+<script src="https://mhjortholt.github.io/rebelwork/js/calculate.js"></script>
+<script src="https://mhjortholt.github.io/rebelwork/js/helpers.js"></script>
+<script>
+
+	$(document).ready(function() {
+		// Hook up sliders
+		$('.slider input').on('input', function() { 
+			manuallyUpdateSlider($(this));
+		});
+		$('#input-antal_timmar').on('input', function() {
+			let h = $(this).val();
+			$('#belaggning').html(' (' + Math.round(h / 1750 * 100) + '% beläggning)');
+		});
+		$('.slider input').on('change', calculate);
+		$('.slider input').each(updateSlider);
+		calculate();
+	});
+
+	function calculate() {
+		// get inputs
+		let input = getStandardInput();
+		input.timarvode = Number($('#input-timarvode').val());
+		input.antal_timmar = Number($('#input-antal_timmar').val());
+		input.onskad_lon_brutto_manad = Number($('#input-onskad_lon_brutto_manad').val());
+		input.utdelning = Number($('#input-utdelning').val());
+
+		// Calculate all
+		let output = calculateValues(input);
+
+		// display results
+		$('#utdelningsmojlighet').text( formatSEK(output.utdelningsmojlighet.max));
+
+		$('#input-utdelning').prop({
+            'min': output.utdelningsmojlighet.min,
+            'max': output.utdelningsmojlighet.max
+        });
+        let a = $('#input-utdelning').val();
+        manuallyUpdateSlider($('#input-utdelning'));
+
+        $('#motsvarande_lon_manad').text( formatSEK(output.motsvarande_lon_manad));        
+        $('#overskott').text( formatSEK(output.overskott));
+	}
+
+</script>
+</body>
+</html>
