@@ -157,5 +157,169 @@
 	}
 
 </script>
+
+<hr />
+<p>Om du kopierar in den här koden borde det funka:</p>
+<textarea style="width: 800px; height: 500px;" id="code">
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="https://mhjortholt.github.io/rebelwork/css/old_style.css" />
+	<link rel="stylesheet" href="https://mhjortholt.github.io/rebelwork/css/style_calc_chart.css" />
+	<link rel="stylesheet" href="https://mhjortholt.github.io/rebelwork/css/range.css" />
+</head>
+<body>
+
+<div class="flex-holder">
+	<div class="container">
+
+		<div>
+			<div id="monthly_sliders">
+				<div class="slider">
+					<label class="sliderLabel">Kommunalskatt: </label>
+					<div class="range-value" data-suffix="%"></div>
+					<input id="input-kommunalskatt" type="range" min="25" value="30" max="35" step="0.1" />
+				</div>
+				<div class="slider">
+					<label class="sliderLabel">Önskad bruttolön (rekommenderat: 45 000 kr):</label>
+					<div class="range-value" data-suffix=" kr/mån"></div>
+					<input id="input-onskad_lon_brutto_manad" type="range" min="1000" value="45000" max="150000" step="500" />
+				</div>
+			</div>
+
+		</div>
+
+		<hr />
+
+		<div class="results">
+			<div>
+				<div>
+					<p>Total lönekostnad: <span id="total_salary"></span></p>
+				</div>
+				<div>
+					<p>Netto (ex jobbskatteavdrag och grundavdrag): <span id="netto_excluding"></span></p>
+				</div>
+				<div>
+					<p>Netto (ink jobbskatteavdrag och grundavdrag): <span id="netto_including"></span></p>
+				</div>
+			</div>
+			
+		</div>
+
+		<hr />
+		<div>
+			Observera att kalkylatorn är något förenklad och menar till att ger en bild av ekonomin och skall därför inte användas för bokföring. Även extremvärderna på lönen kan vara missvisande.
+		</div>
+	</div>
+
+	<div class="donut-container">
+		<div class="chart-container">
+			<div class="chart">
+				<canvas id="chart_salary" width="240" height="240"></canvas>
+				<div class="legend">
+					<div class="item">
+						<div class="square light_red"></div>
+						<span>Arbetsgivaravgift</span>
+					</div>
+					<div class="item">
+						<div class="square red"></div>
+						<span>Kommunalskatt</span>
+					</div>
+					<div class="item">
+						<div class="square dark_red"></div>
+						<span>Statlig skatt</span>
+					</div>
+					<div class="item">
+						<div class="square green"></div>
+						<span>Netto</span>
+					</div>
+				</div>				
+			</div>
+		</div>
+	</div>
+
+</div>
+
+<script src="https://mhjortholt.github.io/rebelwork/js/jquery.js"></script>
+<script src="https://mhjortholt.github.io/rebelwork/js/constants.js"></script>
+<script src="https://mhjortholt.github.io/rebelwork/js/calculate.js"></script>
+<script src="https://mhjortholt.github.io/rebelwork/js/chart.js"></script>
+<script src="https://mhjortholt.github.io/rebelwork/js/helpers.js"></script>
+<script>
+
+	$(document).ready(function() {
+		// Hook up sliders
+		$('.slider input').on('input', function() { 
+			manuallyUpdateSlider($(this));
+		});
+		$('.slider input').on('change', calculate);
+		$('.slider input').each(updateSlider);
+		calculate();
+	});
+
+	let utdelning = 270000;
+	function calculate() {
+
+		// get inputs
+		let input = getStandardInput();
+		input.onskad_lon_brutto_manad = Number($('#input-onskad_lon_brutto_manad').val());
+		input.utdelning = utdelning;
+		//Avrundningsfel om delat på 100 (flyttalsproblem)
+		input.kommunalskatt = Number('0.' + Math.round(Number($('#input-kommunalskatt').val()) * 10));
+
+		// Calculate all
+		let output = calculateValues(input);
+
+		// display results
+		if (output.utdelningsmojlighet.max !== utdelning) {
+			utdelning = output.utdelningsmojlighet.max;
+			calculate();
+		}
+
+        $('#total_salary').text( formatSEK(output.Ltot/12));        
+        $('#netto_excluding').text( formatSEK((output.Tt*(1-output.G6)-output.A3)/12));
+        $('#netto_including').text( formatSEK(output.Nt/12));
+
+        updateCharts(output);
+	}
+
+	// CHART
+	let data_chart = [
+		{ id: 'arbetsgivaravgift', value: 4, color: light_red },
+		{ id: 'kommunalskatt', value: 2, color: red },
+		{ id: 'statlig_skatt', value: 39, color: dark_red },
+		{ id: 'netto', value: 54, color: green },
+	];
+	let chart_salary = new Chart({
+		canvas: document.getElementById('chart_salary'),
+		data: data_chart,
+		thickness: 40
+	});
+
+	function updateCharts(input) {
+
+		let total = input.A1 + input.A2 + input.A3 + input.Nt;
+		
+		let arbetsgivaravgift = input.A1 / total * 100;
+		let kommunalskatt = input.A2 / total * 100;
+		let statlig_skatt = input.A3 / total * 100;
+		let netto = input.Nt / total * 100;
+
+		chart_salary.updateValues([
+			{ id: 'arbetsgivaravgift', new_value: arbetsgivaravgift, tooltip: formatSEK(input.A1) },
+			{ id: 'kommunalskatt', new_value: kommunalskatt, tooltip: formatSEK(input.A2) },
+			{ id: 'statlig_skatt', new_value: statlig_skatt, tooltip: formatSEK(input.A3) },
+			{ id: 'netto', new_value: netto, tooltip: formatSEK(input.Nt) },
+		]);
+
+	}
+
+</script>
+</body>
+</html>
+
+</textarea>
 </body>
 </html>

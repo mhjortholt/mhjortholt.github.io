@@ -66,7 +66,6 @@
 		</div>
 	</div>
 
-
 </div>
 
 <script src="https://mhjortholt.github.io/rebelwork/js/jquery.js"></script>
@@ -116,5 +115,125 @@
 
 
 </script>
+
+<hr />
+<p>Om du kopierar in den här koden borde det funka:</p>
+<textarea style="width: 800px; height: 500px;" id="code">
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="https://mhjortholt.github.io/rebelwork/css/old_style.css" />
+	<link rel="stylesheet" href="https://mhjortholt.github.io/rebelwork/css/style_calc_chart.css" />
+	<link rel="stylesheet" href="https://mhjortholt.github.io/rebelwork/css/range.css" />
+</head>
+<body>
+
+<div class="flex-holder">
+	<div class="container">
+
+		<div>
+			<div id="monthly_sliders">
+				<div class="slider">
+					<label class="sliderLabel">Vad har du för lön:</label>
+					<div class="range-value" data-suffix=" kr/mån"></div>
+					<input id="input-onskad_lon_brutto_manad" type="range" min="0" value="45000" max="150000" step="500" />
+				</div>
+
+				<div class="slider">
+					<label class="sliderLabel">Förmånsvärde per månad:</label>
+					<div class="range-value" data-suffix=" kr/mån"></div>
+					<input id="input-formansvarde_manad" type="range" min="0" value="3500" max="20000" step="100" />
+				</div>
+
+				<div class="slider">
+					<label class="sliderLabel">Leasingavgift (ex. moms) per månad:</label>
+					<div class="range-value" data-suffix=" kr/mån"></div>
+					<input id="input-leasingavgift_manad" type="range" min="0" value="4000" max="20000" step="100" />
+				</div>
+			</div>
+
+		</div>
+
+		<hr />
+
+		<div class="results">
+			<div>
+				<div>
+					<p>Ökad lönekostnad (skatt, arbetgivaravgift eventuell statlig skatt): <span id="okad_lonekostnad"></span></p>
+				</div>
+				<div>
+					<p>Kostnader leasing: <span id="kostnader_leasing"></span></p>
+				</div>
+				<div>
+					<p>Totalt mån: <span id="totalt_manad"></span></p>
+				</div>
+				<div>
+					<p>Totalt år: <span id="totalt_ar"></span></p>
+				</div>
+			</div>
+			
+		</div>
+
+		<hr />
+
+		<div>
+			Ex ev skatter, försäkring, drifkostnader, service etc. <br />
+			Observera att kalkylatorn är något förenklad och menar till att ger en bild av ekonomin och skall därför inte användas för bokföring. Även extremvärderna på lönen kan vara missvisande.
+		</div>
+	</div>
+</div>
+
+<script src="https://mhjortholt.github.io/rebelwork/js/jquery.js"></script>
+<script src="https://mhjortholt.github.io/rebelwork/js/constants.js"></script>
+<script src="https://mhjortholt.github.io/rebelwork/js/calculate.js"></script>
+<script src="https://mhjortholt.github.io/rebelwork/js/helpers.js"></script>
+<script>
+
+	$(document).ready(function() {
+		// Hook up sliders
+		$('.slider input').on('input', function() { 
+			manuallyUpdateSlider($(this));
+		});
+		$('.slider input').on('change', calculate);
+		$('.slider input').each(updateSlider);
+		calculate();
+	});
+
+	let utdelning = 270000;
+	function calculate() {
+
+		// get inputs
+		let input = getStandardInput();
+		input.onskad_lon_brutto_manad = Number($('#input-onskad_lon_brutto_manad').val());
+		input.bil = true;
+		input.utdelning = utdelning;
+		input.B1 = Number($('#input-formansvarde_manad').val());
+		input.B21 = Number($('#input-leasingavgift_manad').val());
+		input.B2 = input.B21*1.125;
+
+		// Calculate all
+		let output = calculateValues(input);
+
+		// display results
+		if (output.utdelningsmojlighet.max !== utdelning) {
+			utdelning = output.utdelningsmojlighet.max;
+			calculate();
+		}
+
+        $('#okad_lonekostnad').text( formatSEK(output.Bt/12));        
+        $('#kostnader_leasing').text( formatSEK(output.B2));
+        let Btot = output.B2+output.Bt/12;
+        $('#totalt_manad').text( formatSEK(Btot));
+        $('#totalt_ar').text( formatSEK(Btot*12));
+	}
+
+</script>
+</body>
+</html>
+
+</textarea>
+
 </body>
 </html>
