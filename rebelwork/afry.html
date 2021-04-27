@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>AFRY calculator</title>
+	<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;1,600&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="https://mhjortholt.github.io/rebelwork/css/old_style.css" />
+	<link rel="stylesheet" href="https://mhjortholt.github.io/rebelwork/css/style_calc_chart.css" />
+	<link rel="stylesheet" href="https://mhjortholt.github.io/rebelwork/css/range.css" />
+</head>
+
+<body>
+
+<div class="flex-holder dashed">
+	<div class="container">
+
+		<div>
+			<div id="monthly_sliders">
+				<div class="slider">
+					<label class="sliderLabel">Omsättning:</label>
+					<div class="range-value" data-suffix=" kr/år"></div>
+					<input id="input-omsattning" type="range" min="10000" value="1312500" max="2000000" step="10000" />
+				</div>
+
+			</div>
+			<div>
+
+				<div class="checkbox">
+					<label>AFRY</label>
+					<input type="checkbox" id="check-afry" onclick="calculate()" />
+				</div>
+				<div class="checkbox">
+					<label>OFFICE</label>
+					<input type="checkbox" id="check-office" onclick="calculate()" checked />
+				</div>
+				<div class="checkbox">
+					<label>Försäkring</label>
+					<input type="checkbox" id="check-forsakring" onclick="calculate()" checked />
+				</div>
+			</div>
+
+		</div>
+
+		<hr />
+
+		<div class="results">
+			<div>
+				<div>
+					<p>Avgift Rebel Work (snitt per månad): <span id="avgift_rw"></span></p>
+				</div>
+			</div>
+		</div>
+
+		<hr />
+		<div>
+			Observera att kalkylatorn är något förenklad och menar till att ger en bild av ekonomin och skall därför inte användas för bokföring. Även extremvärderna på lönen kan vara missvisande.
+		</div>
+	</div>
+
+</div>
+
+<script src="https://mhjortholt.github.io/rebelwork/js/jquery.js"></script>
+<script src="https://mhjortholt.github.io/rebelwork/js/constants.js"></script>
+<script src="https://mhjortholt.github.io/rebelwork/js/calculate.js"></script>
+<script src="https://mhjortholt.github.io/rebelwork/js/helpers.js"></script>
+<script>
+
+	$(document).ready(function() {
+		// Hook up sliders
+		$('.slider input').on('input', function() { 
+			manuallyUpdateSlider($(this));
+		});
+		$('.slider input').on('change', calculate);
+		$('.slider input').each(updateSlider);
+		calculate();
+	});
+
+	let utdelning = 270000;
+	function calculate() {
+
+		// Get inputs
+		let input = getStandardInput();
+		input.utdelning = utdelning;
+		input.afry = $('#check-afry').is(':checked');
+		input.office = $('#check-office').is(':checked');
+		input.forsakring = $('#check-forsakring').is(':checked');
+
+		let omsattning = Number(Number($('#input-omsattning').val()));
+		input.timarvode = omsattning / input.antal_timmar;
+
+		// Calculate all
+		let output = calculateValues(input);
+
+		// display results
+		if (output.utdelningsmojlighet.max !== utdelning) {
+			utdelning = output.utdelningsmojlighet.max;
+			calculate();
+		}
+
+        $('#avgift_rw').text( formatSEK(output.RW / 12));        
+
+	}
+
+</script>
+
+<hr />
+<p>Om du kopierar in den här koden borde det funka:</p>
+<textarea style="width: 800px; height: 500px;" id="code">
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="https://mhjortholt.github.io/rebelwork/css/old_style.css" />
+	<link rel="stylesheet" href="https://mhjortholt.github.io/rebelwork/css/style_calc_chart.css" />
+	<link rel="stylesheet" href="https://mhjortholt.github.io/rebelwork/css/range.css" />
+</head>
+<body>
+
+<div class="flex-holder">
+	<div class="container">
+
+		<div>
+			<div id="monthly_sliders">
+				<div class="slider">
+					<label class="sliderLabel">Omsättning:</label>
+					<div class="range-value" data-suffix=" kr/år"></div>
+					<input id="input-omsattning" type="range" min="10000" value="1312500" max="2000000" step="10000" />
+				</div>
+
+			</div>
+			<div>
+
+				<div class="checkbox">
+					<label>AFRY</label>
+					<input type="checkbox" id="check-afry" onclick="calculate()" />
+				</div>
+				<div class="checkbox">
+					<label>OFFICE</label>
+					<input type="checkbox" id="check-office" onclick="calculate()" checked />
+				</div>
+				<div class="checkbox">
+					<label>Försäkring</label>
+					<input type="checkbox" id="check-forsakring" onclick="calculate()" checked />
+				</div>
+			</div>
+
+		</div>
+
+		<hr />
+
+		<div class="results">
+			<div>
+				<div>
+					<p>Avgift Rebel Work (snitt per månad): <span id="avgift_rw"></span></p>
+				</div>
+			</div>
+		</div>
+
+		<hr />
+		<div>
+			Observera att kalkylatorn är något förenklad och menar till att ger en bild av ekonomin och skall därför inte användas för bokföring. Även extremvärderna på lönen kan vara missvisande.
+		</div>
+	</div>
+
+</div>
+
+<script src="https://mhjortholt.github.io/rebelwork/js/jquery.js"></script>
+<script src="https://mhjortholt.github.io/rebelwork/js/constants.js"></script>
+<script src="https://mhjortholt.github.io/rebelwork/js/calculate.js"></script>
+<script src="https://mhjortholt.github.io/rebelwork/js/helpers.js"></script>
+<script>
+
+	$(document).ready(function() {
+		// Hook up sliders
+		$('.slider input').on('input', function() { 
+			manuallyUpdateSlider($(this));
+		});
+		$('.slider input').on('change', calculate);
+		$('.slider input').each(updateSlider);
+		calculate();
+	});
+
+	let utdelning = 270000;
+	function calculate() {
+
+		// Get inputs
+		let input = getStandardInput();
+		input.utdelning = utdelning;
+		input.afry = $('#check-afry').is(':checked');
+		input.office = $('#check-office').is(':checked');
+		input.forsakring = $('#check-forsakring').is(':checked');
+
+		let omsattning = Number(Number($('#input-omsattning').val()));
+		input.timarvode = omsattning / input.antal_timmar;
+
+		// Calculate all
+		let output = calculateValues(input);
+
+		// display results
+		if (output.utdelningsmojlighet.max !== utdelning) {
+			utdelning = output.utdelningsmojlighet.max;
+			calculate();
+		}
+
+        $('#avgift_rw').text( formatSEK(output.RW / 12));        
+
+	}
+
+</script>
+</body>
+</html>
+
+</textarea>
+</body>
+</html>
