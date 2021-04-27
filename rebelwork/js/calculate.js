@@ -32,6 +32,9 @@ function calculateValues(input) {
 	if (input.B2) {
 		B2 = input.B2;
 	}
+	let afry = input.afry ? true : false;
+	let office = input.office === undefined ? true : input.office;
+	let forsakring = input.forsakring === undefined ? true : input.forsakring;
 // -----------------------------------------------------------------
 	let total_lon_bolaget = Tt = L1*12*M+L1*T2*V;
 	let total_lon_tot = Ttot = Tt+L2*12;
@@ -59,7 +62,7 @@ function calculateValues(input) {
 // -----------------------------------------------------------------
 
 	let omsattning = O1 = T1*T2;
-	let RW = calculateRW();
+	let RW = calculateRW(office, forsakring, afry);
 	let kostnader_personal = R1 = Ltot+P1*12;
 	let kostnader = R2 = K1*12+B2*12+RW; //Hmmm
 	let kostnad_donut = R21 = R2 - RW;
@@ -168,6 +171,7 @@ function calculateValues(input) {
 	}
 	appendAll(output);
 
+/*
 	function calculateRW() {
 		let grund = G12*12;
 		let rorlig = 0;
@@ -185,6 +189,35 @@ function calculateValues(input) {
 
 		return grund + rorlig;
 	}
+*/
+	function calculateRW(office, forsakring, afry) {
+		let tabell = afry ? avgift_rw_rorlig_tabell_afry : avgift_rw_rorlig_tabell;
+
+		let grund = G12*12;
+		let rorlig = 0;
+		let prev = 0;
+
+		function getRorlig(row) {
+			let v = row[4];
+			if(office) v += row[2];
+			if(forsakring) v += row[1];
+			return v;
+		}
+
+		for( let i = 0; i < tabell.length; i++) {
+  			let value = tabell[i];
+  			if(O1 > value[0]) {
+  				rorlig += (value[0] - prev) * getRorlig(value);
+  				prev = value[0];
+  			} else {
+  				rorlig += (O1 - prev) * getRorlig(value);
+  				break;
+  			}
+		}
+
+		return grund + rorlig;
+	}
+
 	function calculateMotsvarandeLon() {
 		let tabellvarde_jobbskatteavdrag = W1 = N2*12-G1*G6;
 		let netto_excl_jobbskatteavdrag = W2 = getJobbskatteavdragFromNetto(W1);
