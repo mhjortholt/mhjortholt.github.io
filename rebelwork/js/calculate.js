@@ -200,7 +200,7 @@ function calculateValues(input) {
 		function getRorlig(row) {
 			let v = row[4];
 			if(office) v += row[2];
-			if(forsakring) v += row[1];
+			if(forsakring) v += row[3];
 			return v;
 		}
 
