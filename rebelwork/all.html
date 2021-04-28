@@ -1,0 +1,1510 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>ALL</title>
+	<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;1,600&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="https://mhjortholt.github.io/rebelwork/css/old_style.css" />
+	<link rel="stylesheet" href="https://mhjortholt.github.io/rebelwork/css/style_calc_chart.css" />
+	<link rel="stylesheet" href="https://mhjortholt.github.io/rebelwork/css/range.css" />
+</head>
+
+<body>
+
+<script src="https://mhjortholt.github.io/rebelwork/js/jquery.js"></script>
+<script src="https://mhjortholt.github.io/rebelwork/js/constants.js"></script>
+<script src="https://mhjortholt.github.io/rebelwork/js/calculate.js"></script>
+<script src="https://mhjortholt.github.io/rebelwork/js/chart.js"></script>
+<script src="https://mhjortholt.github.io/rebelwork/js/helpers.js"></script>
+
+<h1>Allmän kod</h1>
+<p>Klistra in följande kod <b>1 gång</b> i början på varje sida som har en eller flera kalkylatorer</p>
+
+<textarea class="code">
+	<link rel="stylesheet" href="https://mhjortholt.github.io/rebelwork/css/old_style.css" />
+	<link rel="stylesheet" href="https://mhjortholt.github.io/rebelwork/css/style_calc_chart.css" />
+	<link rel="stylesheet" href="https://mhjortholt.github.io/rebelwork/css/range.css" />
+	<script src="https://mhjortholt.github.io/rebelwork/js/jquery.js"></script>
+	<script src="https://mhjortholt.github.io/rebelwork/js/constants.js"></script>
+	<script src="https://mhjortholt.github.io/rebelwork/js/calculate.js"></script>
+	<script src="https://mhjortholt.github.io/rebelwork/js/chart.js"></script>
+	<script src="https://mhjortholt.github.io/rebelwork/js/helpers.js"></script>
+</textarea>
+
+<hr />
+
+<h1>Vad kostar bilen</h1>
+
+<div class="flex-holder dashed">
+	<div class="container car">
+
+		<div>
+			<div>
+				<div class="slider">
+					<label class="sliderLabel">Vad har du för lön:</label>
+					<div class="range-value" data-suffix=" kr/mån"></div>
+					<input id="input-onskad_lon_brutto_manad" type="range" min="0" value="45000" max="150000" step="500" />
+				</div>
+
+				<div class="slider">
+					<label class="sliderLabel">Förmånsvärde per månad:</label>
+					<div class="range-value" data-suffix=" kr/mån"></div>
+					<input id="input-formansvarde_manad" type="range" min="0" value="3500" max="20000" step="100" />
+				</div>
+
+				<div class="slider">
+					<label class="sliderLabel">Leasingavgift (ex. moms) per månad:</label>
+					<div class="range-value" data-suffix=" kr/mån"></div>
+					<input id="input-leasingavgift_manad" type="range" min="0" value="4000" max="20000" step="100" />
+				</div>
+			</div>
+
+		</div>
+
+		<hr />
+
+		<div class="results">
+			<div>
+				<div>
+					<p>Ökad lönekostnad (skatt, arbetgivaravgift eventuell statlig skatt): <span id="okad_lonekostnad"></span></p>
+				</div>
+				<div>
+					<p>Kostnader leasing: <span id="kostnader_leasing"></span></p>
+				</div>
+				<div>
+					<p>Totalt mån: <span id="totalt_manad"></span></p>
+				</div>
+				<div>
+					<p>Totalt år: <span id="totalt_ar"></span></p>
+				</div>
+			</div>
+			
+		</div>
+
+		<hr />
+
+		<div>
+			Ex ev skatter, försäkring, drifkostnader, service etc. <br />
+			Observera att kalkylatorn är något förenklad och menar till att ger en bild av ekonomin och skall därför inte användas för bokföring. Även extremvärderna på lönen kan vara missvisande.
+		</div>
+	</div>
+
+</div>
+
+<script>
+
+	$(document).ready(function() {
+		// Hook up sliders
+		$('.car .slider input').on('input', function() { 
+			manuallyUpdateSlider($(this));
+		});
+		$('.car .slider input').on('change', calculate_car);
+		$('.slider input').each(updateSlider);
+		calculate_car();
+	});
+
+	let utdelning_car = 270000;
+	function calculate_car() {
+
+		// get inputs
+		let input = getStandardInput();
+		input.onskad_lon_brutto_manad = Number($('.car #input-onskad_lon_brutto_manad').val());
+		input.bil = true;
+		input.utdelning = utdelning_car;
+		input.B1 = Number($('.car #input-formansvarde_manad').val());
+		input.B21 = Number($('.car #input-leasingavgift_manad').val());
+		input.B2 = input.B21*1.125;
+
+		// Calculate all
+		let output = calculateValues(input);
+
+		// display results
+		if (output.utdelningsmojlighet.max !== utdelning_car) {
+			utdelning_car = output.utdelningsmojlighet.max;
+			calculate_car();
+		}
+
+        $('.car #okad_lonekostnad').text( formatSEK(output.Bt/12));        
+        $('.car #kostnader_leasing').text( formatSEK(output.B2));
+        let Btot = output.B2+output.Bt/12;
+        $('.car #totalt_manad').text( formatSEK(Btot));
+        $('.car #totalt_ar').text( formatSEK(Btot*12));
+	}
+
+
+
+</script>
+
+<p>Kod att kopiera för bil-kalkylatorn:</p>
+<textarea class="code">
+
+	<div class="flex-holder">
+		<div class="container car">
+
+			<div>
+				<div>
+					<div class="slider">
+						<label class="sliderLabel">Vad har du för lön:</label>
+						<div class="range-value" data-suffix=" kr/mån"></div>
+						<input id="input-onskad_lon_brutto_manad" type="range" min="0" value="45000" max="150000" step="500" />
+					</div>
+
+					<div class="slider">
+						<label class="sliderLabel">Förmånsvärde per månad:</label>
+						<div class="range-value" data-suffix=" kr/mån"></div>
+						<input id="input-formansvarde_manad" type="range" min="0" value="3500" max="20000" step="100" />
+					</div>
+
+					<div class="slider">
+						<label class="sliderLabel">Leasingavgift (ex. moms) per månad:</label>
+						<div class="range-value" data-suffix=" kr/mån"></div>
+						<input id="input-leasingavgift_manad" type="range" min="0" value="4000" max="20000" step="100" />
+					</div>
+				</div>
+
+			</div>
+
+			<hr />
+
+			<div class="results">
+				<div>
+					<div>
+						<p>Ökad lönekostnad (skatt, arbetgivaravgift eventuell statlig skatt): <span id="okad_lonekostnad"></span></p>
+					</div>
+					<div>
+						<p>Kostnader leasing: <span id="kostnader_leasing"></span></p>
+					</div>
+					<div>
+						<p>Totalt mån: <span id="totalt_manad"></span></p>
+					</div>
+					<div>
+						<p>Totalt år: <span id="totalt_ar"></span></p>
+					</div>
+				</div>
+				
+			</div>
+
+			<hr />
+
+			<div>
+				Ex ev skatter, försäkring, drifkostnader, service etc. <br />
+				Observera att kalkylatorn är något förenklad och menar till att ger en bild av ekonomin och skall därför inte användas för bokföring. Även extremvärderna på lönen kan vara missvisande.
+			</div>
+		</div>
+	</div>
+
+	<script>
+
+	$(document).ready(function() {
+		// Hook up sliders
+		$('.car .slider input').on('input', function() { 
+			manuallyUpdateSlider($(this));
+		});
+		$('.car .slider input').on('change', calculate_car);
+		$('.slider input').each(updateSlider);
+		calculate_car();
+	});
+
+	let utdelning_car = 270000;
+	function calculate_car() {
+
+		// get inputs
+		let input = getStandardInput();
+		input.onskad_lon_brutto_manad = Number($('.car #input-onskad_lon_brutto_manad').val());
+		input.bil = true;
+		input.utdelning = utdelning_car;
+		input.B1 = Number($('.car #input-formansvarde_manad').val());
+		input.B21 = Number($('.car #input-leasingavgift_manad').val());
+		input.B2 = input.B21*1.125;
+
+		// Calculate all
+		let output = calculateValues(input);
+
+		// display results
+		if (output.utdelningsmojlighet.max !== utdelning_car) {
+			utdelning_car = output.utdelningsmojlighet.max;
+			calculate_car();
+		}
+
+        $('.car #okad_lonekostnad').text( formatSEK(output.Bt/12));        
+        $('.car #kostnader_leasing').text( formatSEK(output.B2));
+        let Btot = output.B2+output.Bt/12;
+        $('.car #totalt_manad').text( formatSEK(Btot));
+        $('.car #totalt_ar').text( formatSEK(Btot*12));
+	}
+
+	</script>
+
+
+</textarea>
+
+<hr />
+
+<h1>Avgift RW</h1>
+
+<div class="flex-holder dashed">
+	<div class="container fee">
+
+		<div>
+			<div>
+				<div class="slider">
+					<label class="sliderLabel">Omsättning:</label>
+					<div class="range-value" data-suffix=" kr/år"></div>
+					<input id="input-omsattning" type="range" min="10000" value="1312500" max="2000000" step="10000" />
+				</div>
+			</div>
+		</div>
+
+		<hr />
+
+		<div class="results">
+			<div>
+				<div>
+					<p>Avgift Rebel Work: <span id="avgift_rw"></span></p>
+				</div>
+			</div>
+		</div>
+
+		<hr />
+		<div>
+			Observera att kalkylatorn är något förenklad och menar till att ger en bild av ekonomin och skall därför inte användas för bokföring. Även extremvärderna på lönen kan vara missvisande.
+		</div>
+	</div>
+
+	<div class="donut-container">
+		<div class="chart-container">
+			<div class="chart">
+				<canvas id="fee_chart" width="240" height="240"></canvas>
+				<div class="legend">
+					<div class="item">
+						<div class="square light_blue"></div>
+						<span>Färdigt bolag</span>
+					</div>
+					<div class="item">
+						<div class="square light_green"></div>
+						<span>Din del</span>
+					</div>
+				</div>				
+			</div>
+		</div>
+	</div>
+
+</div>
+
+<script>
+
+	$(document).ready(function() {
+		// Hook up sliders
+		$('.fee .slider input').on('input', function() { 
+			manuallyUpdateSlider($(this));
+		});
+		$('.fee .slider input').on('change', calculate_fee);
+		$('.fee .slider input').each(updateSlider);
+		calculate_fee();
+	});
+
+	let utdelning_fee = 270000;
+	function calculate_fee() {
+
+		// Get inputs
+		let input = getStandardInput();
+		input.utdelning = utdelning_fee;
+
+		let omsattning = Number(Number($('.fee #input-omsattning').val()));
+		input.timarvode = omsattning / input.antal_timmar;
+
+		// Calculate all
+		let output = calculateValues(input);
+
+		// display results
+		if (output.utdelningsmojlighet.max !== utdelning_fee) {
+			utdelning_fee = output.utdelningsmojlighet.max;
+			calculate_fee();
+		}
+
+        $('.fee #avgift_rw').text( formatSEK(output.RW));        
+
+        updateChart_fee(output);
+	}
+
+	// CHART
+	let fee_chart = new Chart({
+		canvas: document.getElementById('fee_chart'),
+		data: [
+			{ id: 'rw', value: 2, color: light_blue },
+			{ id: 'din_del', value: 98, color: light_green },
+		],
+		thickness: 40
+	});
+
+	function updateChart_fee(input) {
+
+		let rw = input.RW/input.O1;
+		let din_del = (input.O1-input.RW)/input.O1;
+		let total = din_del + rw;
+
+		rw = (rw/total*100);
+		din_del = (din_del/total*100);
+
+		fee_chart.updateValues([
+			{ id: 'rw', new_value: rw, tooltip: formatPercentage(rw) },
+			{ id: 'din_del', new_value: din_del, tooltip: formatPercentage(din_del) },
+		]);
+	}
+
+</script>
+
+<p>Kod att kopiera för avgifts-kalkylatorn:</p>
+<textarea class="code">
+<div class="flex-holder">
+	<div class="container fee">
+
+		<div>
+			<div>
+				<div class="slider">
+					<label class="sliderLabel">Omsättning:</label>
+					<div class="range-value" data-suffix=" kr/år"></div>
+					<input id="input-omsattning" type="range" min="10000" value="1312500" max="2000000" step="10000" />
+				</div>
+			</div>
+		</div>
+
+		<hr />
+
+		<div class="results">
+			<div>
+				<div>
+					<p>Avgift Rebel Work: <span id="avgift_rw"></span></p>
+				</div>
+			</div>
+		</div>
+
+		<hr />
+		<div>
+			Observera att kalkylatorn är något förenklad och menar till att ger en bild av ekonomin och skall därför inte användas för bokföring. Även extremvärderna på lönen kan vara missvisande.
+		</div>
+	</div>
+
+	<div class="donut-container">
+		<div class="chart-container">
+			<div class="chart">
+				<canvas id="fee_chart" width="240" height="240"></canvas>
+				<div class="legend">
+					<div class="item">
+						<div class="square light_blue"></div>
+						<span>Färdigt bolag</span>
+					</div>
+					<div class="item">
+						<div class="square light_green"></div>
+						<span>Din del</span>
+					</div>
+				</div>				
+			</div>
+		</div>
+	</div>
+
+</div>
+
+<script>
+
+	$(document).ready(function() {
+		// Hook up sliders
+		$('.fee .slider input').on('input', function() { 
+			manuallyUpdateSlider($(this));
+		});
+		$('.fee .slider input').on('change', calculate_fee);
+		$('.fee .slider input').each(updateSlider);
+		calculate_fee();
+	});
+
+	let utdelning_fee = 270000;
+	function calculate_fee() {
+
+		// Get inputs
+		let input = getStandardInput();
+		input.utdelning = utdelning_fee;
+
+		let omsattning = Number(Number($('.fee #input-omsattning').val()));
+		input.timarvode = omsattning / input.antal_timmar;
+
+		// Calculate all
+		let output = calculateValues(input);
+
+		// display results
+		if (output.utdelningsmojlighet.max !== utdelning_fee) {
+			utdelning_fee = output.utdelningsmojlighet.max;
+			calculate_fee();
+		}
+
+        $('.fee #avgift_rw').text( formatSEK(output.RW));        
+
+        updateChart_fee(output);
+	}
+
+	// CHART
+	let fee_chart = new Chart({
+		canvas: document.getElementById('fee_chart'),
+		data: [
+			{ id: 'rw', value: 2, color: light_blue },
+			{ id: 'din_del', value: 98, color: light_green },
+		],
+		thickness: 40
+	});
+
+	function updateChart_fee(input) {
+
+		let rw = input.RW/input.O1;
+		let din_del = (input.O1-input.RW)/input.O1;
+		let total = din_del + rw;
+
+		rw = (rw/total*100);
+		din_del = (din_del/total*100);
+
+		fee_chart.updateValues([
+			{ id: 'rw', new_value: rw, tooltip: formatPercentage(rw) },
+			{ id: 'din_del', new_value: din_del, tooltip: formatPercentage(din_del) },
+		]);
+	}
+
+</script>
+
+</textarea>
+
+<hr />
+
+<h1>Avgift RW (med försäkring och OFFICE som val)</h1>
+
+<div class="flex-holder dashed">
+	<div class="container fee_detailed">
+
+		<div>
+			<div>
+				<div class="slider">
+					<label class="sliderLabel">Omsättning:</label>
+					<div class="range-value" data-suffix=" kr/år"></div>
+					<input id="input-omsattning" type="range" min="10000" value="1312500" max="2000000" step="10000" />
+				</div>
+			</div>
+
+			<div>
+				<div class="checkbox">
+					<label>OFFICE</label>
+					<input type="checkbox" id="check-office" onclick="calculate_fee_detailed()" checked />
+				</div>
+				<div class="checkbox">
+					<label>Försäkring</label>
+					<input type="checkbox" id="check-forsakring" onclick="calculate_fee_detailed()" checked />
+				</div>
+			</div>
+		</div>
+
+		<hr />
+
+		<div class="results">
+			<div>
+				<div>
+					<p>Avgift Rebel Work (snitt per månad): <span id="avgift_rw"></span></p>
+				</div>
+			</div>
+		</div>
+
+		<hr />
+		<div>
+			Observera att kalkylatorn är något förenklad och menar till att ger en bild av ekonomin och skall därför inte användas för bokföring. Även extremvärderna på lönen kan vara missvisande.
+		</div>
+	</div>
+
+	<div class="donut-container">
+		<div class="chart-container">
+			<div class="chart">
+				<canvas id="fee_detailed_chart" width="240" height="240"></canvas>
+				<div class="legend">
+					<div class="item">
+						<div class="square light_blue"></div>
+						<span>Färdigt bolag</span>
+					</div>
+					<div class="item">
+						<div class="square light_green"></div>
+						<span>Din del</span>
+					</div>
+				</div>				
+			</div>
+		</div>
+	</div>
+
+</div>
+
+<script>
+
+	$(document).ready(function() {
+		// Hook up sliders
+		$('.fee_detailed .slider input').on('input', function() { 
+			manuallyUpdateSlider($(this));
+		});
+		$('.fee_detailed .slider input').on('change', calculate_fee_detailed);
+		$('.fee_detailed .slider input').each(updateSlider);
+		calculate_fee_detailed();
+	});
+
+	let utdelning_fee_detailed = 270000;
+	function calculate_fee_detailed() {
+
+		// Get inputs
+		let input = getStandardInput();
+		input.utdelning = utdelning_fee_detailed;
+
+		let omsattning = Number(Number($('.fee_detailed #input-omsattning').val()));
+		input.timarvode = omsattning / input.antal_timmar;
+		input.office = $('.fee_detailed #check-office').is(':checked');
+		input.forsakring = $('.fee_detailed #check-forsakring').is(':checked');
+
+		// Calculate all
+		let output = calculateValues(input);
+
+		// display results
+		if (output.utdelningsmojlighet.max !== utdelning_fee_detailed) {
+			utdelning_fee_detailed = output.utdelningsmojlighet.max;
+			calculate_fee_detailed();
+		}
+
+        $('.fee_detailed #avgift_rw').text( formatSEK(output.RW / 12));        
+
+        updateChart_fee_detailed(output);
+	}
+
+	// CHART
+	let fee_detailed_chart = new Chart({
+		canvas: document.getElementById('fee_detailed_chart'),
+		data: [
+			{ id: 'rw', value: 2, color: light_blue },
+			{ id: 'din_del', value: 98, color: light_green },
+		],
+		thickness: 40
+	});
+
+	function updateChart_fee_detailed(input) {
+
+		let rw = input.RW/input.O1;
+		let din_del = (input.O1-input.RW)/input.O1;
+		let total = din_del + rw;
+
+		rw = (rw/total*100);
+		din_del = (din_del/total*100);
+
+		fee_detailed_chart.updateValues([
+			{ id: 'rw', new_value: rw, tooltip: formatPercentage(rw) },
+			{ id: 'din_del', new_value: din_del, tooltip: formatPercentage(din_del) },
+		]);
+	}
+
+</script>
+
+<p>Kod att kopiera för avgifts-kalkylatorn:</p>
+<textarea class="code">
+
+<div class="flex-holder">
+	<div class="container fee_detailed">
+
+		<div>
+			<div>
+				<div class="slider">
+					<label class="sliderLabel">Omsättning:</label>
+					<div class="range-value" data-suffix=" kr/år"></div>
+					<input id="input-omsattning" type="range" min="10000" value="1312500" max="2000000" step="10000" />
+				</div>
+			</div>
+
+			<div>
+				<div class="checkbox">
+					<label>OFFICE</label>
+					<input type="checkbox" id="check-office" onclick="calculate_fee_detailed()" checked />
+				</div>
+				<div class="checkbox">
+					<label>Försäkring</label>
+					<input type="checkbox" id="check-forsakring" onclick="calculate_fee_detailed()" checked />
+				</div>
+			</div>
+		</div>
+
+		<hr />
+
+		<div class="results">
+			<div>
+				<div>
+					<p>Avgift Rebel Work (snitt per månad): <span id="avgift_rw"></span></p>
+				</div>
+			</div>
+		</div>
+
+		<hr />
+		<div>
+			Observera att kalkylatorn är något förenklad och menar till att ger en bild av ekonomin och skall därför inte användas för bokföring. Även extremvärderna på lönen kan vara missvisande.
+		</div>
+	</div>
+
+	<div class="donut-container">
+		<div class="chart-container">
+			<div class="chart">
+				<canvas id="fee_detailed_chart" width="240" height="240"></canvas>
+				<div class="legend">
+					<div class="item">
+						<div class="square light_blue"></div>
+						<span>Färdigt bolag</span>
+					</div>
+					<div class="item">
+						<div class="square light_green"></div>
+						<span>Din del</span>
+					</div>
+				</div>				
+			</div>
+		</div>
+	</div>
+
+</div>
+
+<script>
+
+	$(document).ready(function() {
+		// Hook up sliders
+		$('.fee_detailed .slider input').on('input', function() { 
+			manuallyUpdateSlider($(this));
+		});
+		$('.fee_detailed .slider input').on('change', calculate_fee_detailed);
+		$('.fee_detailed .slider input').each(updateSlider);
+		calculate_fee_detailed();
+	});
+
+	let utdelning_fee_detailed = 270000;
+	function calculate_fee_detailed() {
+
+		// Get inputs
+		let input = getStandardInput();
+		input.utdelning = utdelning_fee_detailed;
+
+		let omsattning = Number(Number($('.fee_detailed #input-omsattning').val()));
+		input.timarvode = omsattning / input.antal_timmar;
+		input.office = $('.fee_detailed #check-office').is(':checked');
+		input.forsakring = $('.fee_detailed #check-forsakring').is(':checked');
+
+		// Calculate all
+		let output = calculateValues(input);
+
+		// display results
+		if (output.utdelningsmojlighet.max !== utdelning_fee_detailed) {
+			utdelning_fee_detailed = output.utdelningsmojlighet.max;
+			calculate_fee_detailed();
+		}
+
+        $('.fee_detailed #avgift_rw').text( formatSEK(output.RW / 12));        
+
+        updateChart_fee_detailed(output);
+	}
+
+	// CHART
+	let fee_detailed_chart = new Chart({
+		canvas: document.getElementById('fee_detailed_chart'),
+		data: [
+			{ id: 'rw', value: 2, color: light_blue },
+			{ id: 'din_del', value: 98, color: light_green },
+		],
+		thickness: 40
+	});
+
+	function updateChart_fee_detailed(input) {
+
+		let rw = input.RW/input.O1;
+		let din_del = (input.O1-input.RW)/input.O1;
+		let total = din_del + rw;
+
+		rw = (rw/total*100);
+		din_del = (din_del/total*100);
+
+		fee_detailed_chart.updateValues([
+			{ id: 'rw', new_value: rw, tooltip: formatPercentage(rw) },
+			{ id: 'din_del', new_value: din_del, tooltip: formatPercentage(din_del) },
+		]);
+	}
+
+</script>
+
+</textarea>
+
+<hr />
+
+<h1>Avgift RW AFRY</h1>
+
+<div class="flex-holder dashed">
+	<div class="container fee_afry">
+
+		<div>
+			<div>
+				<div class="slider">
+					<label class="sliderLabel">Omsättning:</label>
+					<div class="range-value" data-suffix=" kr/år"></div>
+					<input id="input-omsattning" type="range" min="10000" value="1312500" max="2000000" step="10000" />
+				</div>
+			</div>
+
+			<div>
+				<div class="checkbox">
+					<label>OFFICE</label>
+					<input type="checkbox" id="check-office" onclick="calculate_fee_afry()" checked />
+				</div>
+				<div class="checkbox">
+					<label>Försäkring</label>
+					<input type="checkbox" id="check-forsakring" onclick="calculate_fee_afry()" checked />
+				</div>
+			</div>
+		</div>
+
+		<hr />
+
+		<div class="results">
+			<div>
+				<div>
+					<p>Avgift Rebel Work (snitt per månad): <span id="avgift_rw"></span></p>
+				</div>
+			</div>
+		</div>
+
+		<hr />
+		<div>
+			Observera att kalkylatorn är något förenklad och menar till att ger en bild av ekonomin och skall därför inte användas för bokföring. Även extremvärderna på lönen kan vara missvisande.
+		</div>
+	</div>
+
+	<div class="donut-container">
+		<div class="chart-container">
+			<div class="chart">
+				<canvas id="fee_afry_chart" width="240" height="240"></canvas>
+				<div class="legend">
+					<div class="item">
+						<div class="square light_blue"></div>
+						<span>Färdigt bolag</span>
+					</div>
+					<div class="item">
+						<div class="square light_green"></div>
+						<span>Din del</span>
+					</div>
+				</div>				
+			</div>
+		</div>
+	</div>
+
+</div>
+
+<script>
+
+	$(document).ready(function() {
+		// Hook up sliders
+		$('.fee_afry .slider input').on('input', function() { 
+			manuallyUpdateSlider($(this));
+		});
+		$('.fee_afry .slider input').on('change', calculate_fee_afry);
+		$('.fee_afry .slider input').each(updateSlider);
+		calculate_fee_afry();
+	});
+
+	let utdelning_fee_afry = 270000;
+	function calculate_fee_afry() {
+
+		// Get inputs
+		let input = getStandardInput();
+		input.utdelning = utdelning_fee_afry;
+
+		let omsattning = Number(Number($('.fee_afry #input-omsattning').val()));
+		input.timarvode = omsattning / input.antal_timmar;
+		input.afry = true;
+		input.office = $('.fee_afry #check-office').is(':checked');
+		input.forsakring = $('.fee_afry #check-forsakring').is(':checked');
+
+		// Calculate all
+		let output = calculateValues(input);
+
+		// display results
+		if (output.utdelningsmojlighet.max !== utdelning_fee_afry) {
+			utdelning_fee_afry = output.utdelningsmojlighet.max;
+			calculate_fee_afry();
+		}
+
+        $('.fee_afry #avgift_rw').text( formatSEK(output.RW / 12));        
+
+        updateChart_fee_afry(output);
+	}
+
+	// CHART
+	let fee_afry_chart = new Chart({
+		canvas: document.getElementById('fee_afry_chart'),
+		data: [
+			{ id: 'rw', value: 2, color: light_blue },
+			{ id: 'din_del', value: 98, color: light_green },
+		],
+		thickness: 40
+	});
+
+	function updateChart_fee_afry(input) {
+
+		let rw = input.RW/input.O1;
+		let din_del = (input.O1-input.RW)/input.O1;
+		let total = din_del + rw;
+
+		rw = (rw/total*100);
+		din_del = (din_del/total*100);
+
+		fee_afry_chart.updateValues([
+			{ id: 'rw', new_value: rw, tooltip: formatPercentage(rw) },
+			{ id: 'din_del', new_value: din_del, tooltip: formatPercentage(din_del) },
+		]);
+	}
+
+</script>
+
+<p>Kod att kopiera för afry-kalkylatorn:</p>
+<textarea class="code">
+
+<div class="flex-holder">
+	<div class="container fee_afry">
+
+		<div>
+			<div>
+				<div class="slider">
+					<label class="sliderLabel">Omsättning:</label>
+					<div class="range-value" data-suffix=" kr/år"></div>
+					<input id="input-omsattning" type="range" min="10000" value="1312500" max="2000000" step="10000" />
+				</div>
+			</div>
+
+			<div>
+				<div class="checkbox">
+					<label>OFFICE</label>
+					<input type="checkbox" id="check-office" onclick="calculate_fee_afry()" checked />
+				</div>
+				<div class="checkbox">
+					<label>Försäkring</label>
+					<input type="checkbox" id="check-forsakring" onclick="calculate_fee_afry()" checked />
+				</div>
+			</div>
+		</div>
+
+		<hr />
+
+		<div class="results">
+			<div>
+				<div>
+					<p>Avgift Rebel Work (snitt per månad): <span id="avgift_rw"></span></p>
+				</div>
+			</div>
+		</div>
+
+		<hr />
+		<div>
+			Observera att kalkylatorn är något förenklad och menar till att ger en bild av ekonomin och skall därför inte användas för bokföring. Även extremvärderna på lönen kan vara missvisande.
+		</div>
+	</div>
+
+	<div class="donut-container">
+		<div class="chart-container">
+			<div class="chart">
+				<canvas id="fee_afry_chart" width="240" height="240"></canvas>
+				<div class="legend">
+					<div class="item">
+						<div class="square light_blue"></div>
+						<span>Färdigt bolag</span>
+					</div>
+					<div class="item">
+						<div class="square light_green"></div>
+						<span>Din del</span>
+					</div>
+				</div>				
+			</div>
+		</div>
+	</div>
+
+</div>
+
+<script>
+
+	$(document).ready(function() {
+		// Hook up sliders
+		$('.fee_afry .slider input').on('input', function() { 
+			manuallyUpdateSlider($(this));
+		});
+		$('.fee_afry .slider input').on('change', calculate_fee_afry);
+		$('.fee_afry .slider input').each(updateSlider);
+		calculate_fee_afry();
+	});
+
+	let utdelning_fee_afry = 270000;
+	function calculate_fee_afry() {
+
+		// Get inputs
+		let input = getStandardInput();
+		input.utdelning = utdelning_fee_afry;
+
+		let omsattning = Number(Number($('.fee_afry #input-omsattning').val()));
+		input.timarvode = omsattning / input.antal_timmar;
+		input.afry = true;
+		input.office = $('.fee_afry #check-office').is(':checked');
+		input.forsakring = $('.fee_afry #check-forsakring').is(':checked');
+
+		// Calculate all
+		let output = calculateValues(input);
+
+		// display results
+		if (output.utdelningsmojlighet.max !== utdelning_fee_afry) {
+			utdelning_fee_afry = output.utdelningsmojlighet.max;
+			calculate_fee_afry();
+		}
+
+        $('.fee_afry #avgift_rw').text( formatSEK(output.RW / 12));        
+
+        updateChart_fee_afry(output);
+	}
+
+	// CHART
+	let fee_afry_chart = new Chart({
+		canvas: document.getElementById('fee_afry_chart'),
+		data: [
+			{ id: 'rw', value: 2, color: light_blue },
+			{ id: 'din_del', value: 98, color: light_green },
+		],
+		thickness: 40
+	});
+
+	function updateChart_fee_afry(input) {
+
+		let rw = input.RW/input.O1;
+		let din_del = (input.O1-input.RW)/input.O1;
+		let total = din_del + rw;
+
+		rw = (rw/total*100);
+		din_del = (din_del/total*100);
+
+		fee_afry_chart.updateValues([
+			{ id: 'rw', new_value: rw, tooltip: formatPercentage(rw) },
+			{ id: 'din_del', new_value: din_del, tooltip: formatPercentage(din_del) },
+		]);
+	}
+
+</script>
+
+</textarea>
+
+<hr />
+
+<h1>Preview</h1>
+
+<div class="flex-holder dashed">
+	<div class="container preview">
+
+		<div>
+			<div>
+				<div class="slider">
+					<label class="sliderLabel">Timarvode: </label>
+					<div class="range-value" data-suffix=" kr/tim"></div>
+					<input id="input-timarvode" type="range" min="300" value="750" max="1500" step="10" />
+				</div>
+				<div class="slider">
+					<label class="sliderLabel">Antal timmar per år:</label>
+					<div class="range-value" data-suffix=" timmar"></div>
+					<span id="belaggning"> (100% beläggning)</span>
+					<input id="input-antal_timmar" type="range" min="0" value="1750" max="2500" step="10" />
+				</div>
+				<div class="slider">
+					<label class="sliderLabel">Önskad bruttolön (rekommenderat: 45 000 kr):</label>
+					<div class="range-value" data-suffix=" kr/mån"></div>
+					<input id="input-onskad_lon_brutto_manad" type="range" min="0" value="45000" max="150000" step="500" />
+				</div>
+			</div>
+
+			<div>
+				<p>Kostnader per månad (mobil, resor, ersättningar etc): 5000 kr</p>
+			</div>
+
+			<hr />
+
+			<div>
+				<div>
+					<p>Utdelningsmöjlighet (begränsas av lön eller vinst): <span id="utdelningsmojlighet"></span></p>
+				</div>
+
+				<div class="slider">
+					<label class="sliderLabel">Utdelning:</label>
+					<div class="range-value" data-suffix=" kr"></div>
+					<input id="input-utdelning" type="range" min="0" value="300000" max="300000" step="1000" />
+				</div>
+			</div>
+		</div>
+
+		<hr />
+
+		<div class="results">
+			<div>
+				<h2>AB med Rebel Work</h2>
+				<div>
+					<p class="monthly_result">Motsvarande bruttolön: <span id="motsvarande_lon_manad"></span></p>
+				</div>
+				<div>
+					<p class="monthly_result">Överskott: <span id="overskott"></span></p>
+				</div>
+			</div>
+			
+		</div>
+
+		<hr />
+
+		<div>
+			Observera att kalkylatorn är något förenklad och menar till att ger en bild av ekonomin och skall därför inte användas för bokföring. Även extremvärderna på lönen kan vara missvisande.
+		</div>
+	</div>
+
+
+</div>
+
+<script>
+
+	$(document).ready(function() {
+		// Hook up sliders
+		$('.preview .slider input').on('input', function() { 
+			manuallyUpdateSlider($(this));
+		});
+		$('.preview #input-antal_timmar').on('input', function() {
+			let h = $(this).val();
+			$('.preview #belaggning').html(' (' + Math.round(h / 1750 * 100) + '% beläggning)');
+		});
+		$('.preview .slider input').on('change', calculate_preview);
+		$('.preview .slider input').each(updateSlider);
+		calculate_preview();
+	});
+
+	function calculate_preview() {
+		// get inputs
+		let input = getStandardInput();
+		input.timarvode = Number($('.preview #input-timarvode').val());
+		input.antal_timmar = Number($('.preview #input-antal_timmar').val());
+		input.onskad_lon_brutto_manad = Number($('.preview #input-onskad_lon_brutto_manad').val());
+		input.utdelning = Number($('.preview #input-utdelning').val());
+
+		// Calculate all
+		let output = calculateValues(input);
+
+		// display results
+		$('.preview #utdelningsmojlighet').text( formatSEK(output.utdelningsmojlighet.max));
+
+		$('.preview #input-utdelning').prop({
+            'min': output.utdelningsmojlighet.min,
+            'max': output.utdelningsmojlighet.max
+        });
+        let a = $('.preview #input-utdelning').val();
+        manuallyUpdateSlider($('.preview #input-utdelning'));
+
+        $('.preview #motsvarande_lon_manad').text( formatSEK(output.motsvarande_lon_manad));        
+        $('.preview #overskott').text( formatSEK(output.overskott));
+	}
+
+</script>
+
+<p>Kod att kopiera för preview-kalkylatorn:</p>
+<textarea class="code">
+<div class="flex-holder">
+	<div class="container preview">
+
+		<div>
+			<div>
+				<div class="slider">
+					<label class="sliderLabel">Timarvode: </label>
+					<div class="range-value" data-suffix=" kr/tim"></div>
+					<input id="input-timarvode" type="range" min="300" value="750" max="1500" step="10" />
+				</div>
+				<div class="slider">
+					<label class="sliderLabel">Antal timmar per år:</label>
+					<div class="range-value" data-suffix=" timmar"></div>
+					<span id="belaggning"> (100% beläggning)</span>
+					<input id="input-antal_timmar" type="range" min="0" value="1750" max="2500" step="10" />
+				</div>
+				<div class="slider">
+					<label class="sliderLabel">Önskad bruttolön (rekommenderat: 45 000 kr):</label>
+					<div class="range-value" data-suffix=" kr/mån"></div>
+					<input id="input-onskad_lon_brutto_manad" type="range" min="0" value="45000" max="150000" step="500" />
+				</div>
+			</div>
+
+			<div>
+				<p>Kostnader per månad (mobil, resor, ersättningar etc): 5000 kr</p>
+			</div>
+
+			<hr />
+
+			<div>
+				<div>
+					<p>Utdelningsmöjlighet (begränsas av lön eller vinst): <span id="utdelningsmojlighet"></span></p>
+				</div>
+
+				<div class="slider">
+					<label class="sliderLabel">Utdelning:</label>
+					<div class="range-value" data-suffix=" kr"></div>
+					<input id="input-utdelning" type="range" min="0" value="300000" max="300000" step="1000" />
+				</div>
+			</div>
+		</div>
+
+		<hr />
+
+		<div class="results">
+			<div>
+				<h2>AB med Rebel Work</h2>
+				<div>
+					<p class="monthly_result">Motsvarande bruttolön: <span id="motsvarande_lon_manad"></span></p>
+				</div>
+				<div>
+					<p class="monthly_result">Överskott: <span id="overskott"></span></p>
+				</div>
+			</div>
+			
+		</div>
+
+		<hr />
+
+		<div>
+			Observera att kalkylatorn är något förenklad och menar till att ger en bild av ekonomin och skall därför inte användas för bokföring. Även extremvärderna på lönen kan vara missvisande.
+		</div>
+	</div>
+
+
+</div>
+
+<script>
+
+	$(document).ready(function() {
+		// Hook up sliders
+		$('.preview .slider input').on('input', function() { 
+			manuallyUpdateSlider($(this));
+		});
+		$('.preview #input-antal_timmar').on('input', function() {
+			let h = $(this).val();
+			$('.preview #belaggning').html(' (' + Math.round(h / 1750 * 100) + '% beläggning)');
+		});
+		$('.preview .slider input').on('change', calculate_preview);
+		$('.preview .slider input').each(updateSlider);
+		calculate_preview();
+	});
+
+	function calculate_preview() {
+		// get inputs
+		let input = getStandardInput();
+		input.timarvode = Number($('.preview #input-timarvode').val());
+		input.antal_timmar = Number($('.preview #input-antal_timmar').val());
+		input.onskad_lon_brutto_manad = Number($('.preview #input-onskad_lon_brutto_manad').val());
+		input.utdelning = Number($('.preview #input-utdelning').val());
+
+		// Calculate all
+		let output = calculateValues(input);
+
+		// display results
+		$('.preview #utdelningsmojlighet').text( formatSEK(output.utdelningsmojlighet.max));
+
+		$('.preview #input-utdelning').prop({
+            'min': output.utdelningsmojlighet.min,
+            'max': output.utdelningsmojlighet.max
+        });
+        let a = $('.preview #input-utdelning').val();
+        manuallyUpdateSlider($('.preview #input-utdelning'));
+
+        $('.preview #motsvarande_lon_manad').text( formatSEK(output.motsvarande_lon_manad));        
+        $('.preview #overskott').text( formatSEK(output.overskott));
+	}
+
+</script>
+</textarea>
+
+<hr />
+
+<h1>Vad kostar din lön</h1>
+
+<div class="flex-holder dashed">
+	<div class="container salary">
+
+		<div>
+			<div>
+				<div class="slider">
+					<label class="sliderLabel">Kommunalskatt: </label>
+					<div class="range-value" data-suffix="%"></div>
+					<input id="input-kommunalskatt" type="range" min="25" value="30" max="35" step="0.1" />
+				</div>
+				<div class="slider">
+					<label class="sliderLabel">Önskad bruttolön (rekommenderat: 45 000 kr):</label>
+					<div class="range-value" data-suffix=" kr/mån"></div>
+					<input id="input-onskad_lon_brutto_manad" type="range" min="1000" value="45000" max="150000" step="500" />
+				</div>
+			</div>
+
+		</div>
+
+		<hr />
+
+		<div class="results">
+			<div>
+				<div>
+					<p>Total lönekostnad: <span id="total_salary"></span></p>
+				</div>
+				<div>
+					<p>Netto (ex jobbskatteavdrag och grundavdrag): <span id="netto_excluding"></span></p>
+				</div>
+				<div>
+					<p>Netto (ink jobbskatteavdrag och grundavdrag): <span id="netto_including"></span></p>
+				</div>
+			</div>
+			
+		</div>
+
+		<hr />
+		<div>
+			Observera att kalkylatorn är något förenklad och menar till att ger en bild av ekonomin och skall därför inte användas för bokföring. Även extremvärderna på lönen kan vara missvisande.
+		</div>
+	</div>
+
+	<div class="donut-container">
+		<div class="chart-container">
+			<div class="chart">
+				<canvas id="chart_salary" width="240" height="240"></canvas>
+				<div class="legend">
+					<div class="item">
+						<div class="square light_red"></div>
+						<span>Arbetsgivaravgift</span>
+					</div>
+					<div class="item">
+						<div class="square red"></div>
+						<span>Kommunalskatt</span>
+					</div>
+					<div class="item">
+						<div class="square dark_red"></div>
+						<span>Statlig skatt</span>
+					</div>
+					<div class="item">
+						<div class="square green"></div>
+						<span>Netto</span>
+					</div>
+				</div>				
+			</div>
+		</div>
+	</div>
+
+</div>
+
+<script>
+
+	$(document).ready(function() {
+		// Hook up sliders
+		$('.salary .slider input').on('input', function() { 
+			manuallyUpdateSlider($(this));
+		});
+		$('.salary .slider input').on('change', calculate_salary);
+		$('.salary .slider input').each(updateSlider);
+		calculate_salary();
+	});
+
+	let utdelning_salary = 270000;
+	function calculate_salary() {
+
+		// get inputs
+		let input = getStandardInput();
+		input.onskad_lon_brutto_manad = Number($('.salary #input-onskad_lon_brutto_manad').val());
+		input.utdelning = utdelning_salary;
+		//Avrundningsfel om delat på 100 (flyttalsproblem)
+		input.kommunalskatt = Number('0.' + Math.round(Number($('.salary #input-kommunalskatt').val()) * 10));
+
+		// Calculate all
+		let output = calculateValues(input);
+
+		// display results
+		if (output.utdelningsmojlighet.max !== utdelning_salary) {
+			utdelning_salary = output.utdelningsmojlighet.max;
+			calculate_salary();
+		}
+
+        $('.salary #total_salary').text( formatSEK(output.Ltot/12));        
+        $('.salary #netto_excluding').text( formatSEK((output.Tt*(1-output.G6)-output.A3)/12));
+        $('.salary #netto_including').text( formatSEK(output.Nt/12));
+
+        updateChart_salary(output);
+	}
+
+	// CHART
+	let chart_salary = new Chart({
+		canvas: document.getElementById('chart_salary'),
+		data: [
+			{ id: 'arbetsgivaravgift', value: 4, color: light_red },
+			{ id: 'kommunalskatt', value: 2, color: red },
+			{ id: 'statlig_skatt', value: 39, color: dark_red },
+			{ id: 'netto', value: 54, color: green },
+		],
+		thickness: 40
+	});
+
+	function updateChart_salary(input) {
+
+		let total = input.A1 + input.A2 + input.A3 + input.Nt;
+		
+		let arbetsgivaravgift = input.A1 / total * 100;
+		let kommunalskatt = input.A2 / total * 100;
+		let statlig_skatt = input.A3 / total * 100;
+		let netto = input.Nt / total * 100;
+
+		chart_salary.updateValues([
+			{ id: 'arbetsgivaravgift', new_value: arbetsgivaravgift, tooltip: formatSEK(input.A1) },
+			{ id: 'kommunalskatt', new_value: kommunalskatt, tooltip: formatSEK(input.A2) },
+			{ id: 'statlig_skatt', new_value: statlig_skatt, tooltip: formatSEK(input.A3) },
+			{ id: 'netto', new_value: netto, tooltip: formatSEK(input.Nt) },
+		]);
+
+	}
+
+</script>
+
+<p>Kod att kopiera för löne-kalkylatorn:</p>
+<textarea class="code">
+
+<div class="flex-holder">
+	<div class="container salary">
+
+		<div>
+			<div>
+				<div class="slider">
+					<label class="sliderLabel">Kommunalskatt: </label>
+					<div class="range-value" data-suffix="%"></div>
+					<input id="input-kommunalskatt" type="range" min="25" value="30" max="35" step="0.1" />
+				</div>
+				<div class="slider">
+					<label class="sliderLabel">Önskad bruttolön (rekommenderat: 45 000 kr):</label>
+					<div class="range-value" data-suffix=" kr/mån"></div>
+					<input id="input-onskad_lon_brutto_manad" type="range" min="1000" value="45000" max="150000" step="500" />
+				</div>
+			</div>
+
+		</div>
+
+		<hr />
+
+		<div class="results">
+			<div>
+				<div>
+					<p>Total lönekostnad: <span id="total_salary"></span></p>
+				</div>
+				<div>
+					<p>Netto (ex jobbskatteavdrag och grundavdrag): <span id="netto_excluding"></span></p>
+				</div>
+				<div>
+					<p>Netto (ink jobbskatteavdrag och grundavdrag): <span id="netto_including"></span></p>
+				</div>
+			</div>
+			
+		</div>
+
+		<hr />
+		<div>
+			Observera att kalkylatorn är något förenklad och menar till att ger en bild av ekonomin och skall därför inte användas för bokföring. Även extremvärderna på lönen kan vara missvisande.
+		</div>
+	</div>
+
+	<div class="donut-container">
+		<div class="chart-container">
+			<div class="chart">
+				<canvas id="chart_salary" width="240" height="240"></canvas>
+				<div class="legend">
+					<div class="item">
+						<div class="square light_red"></div>
+						<span>Arbetsgivaravgift</span>
+					</div>
+					<div class="item">
+						<div class="square red"></div>
+						<span>Kommunalskatt</span>
+					</div>
+					<div class="item">
+						<div class="square dark_red"></div>
+						<span>Statlig skatt</span>
+					</div>
+					<div class="item">
+						<div class="square green"></div>
+						<span>Netto</span>
+					</div>
+				</div>				
+			</div>
+		</div>
+	</div>
+
+</div>
+
+<script>
+
+	$(document).ready(function() {
+		// Hook up sliders
+		$('.salary .slider input').on('input', function() { 
+			manuallyUpdateSlider($(this));
+		});
+		$('.salary .slider input').on('change', calculate_salary);
+		$('.salary .slider input').each(updateSlider);
+		calculate_salary();
+	});
+
+	let utdelning_salary = 270000;
+	function calculate_salary() {
+
+		// get inputs
+		let input = getStandardInput();
+		input.onskad_lon_brutto_manad = Number($('.salary #input-onskad_lon_brutto_manad').val());
+		input.utdelning = utdelning_salary;
+		//Avrundningsfel om delat på 100 (flyttalsproblem)
+		input.kommunalskatt = Number('0.' + Math.round(Number($('.salary #input-kommunalskatt').val()) * 10));
+
+		// Calculate all
+		let output = calculateValues(input);
+
+		// display results
+		if (output.utdelningsmojlighet.max !== utdelning_salary) {
+			utdelning_salary = output.utdelningsmojlighet.max;
+			calculate_salary();
+		}
+
+        $('.salary #total_salary').text( formatSEK(output.Ltot/12));        
+        $('.salary #netto_excluding').text( formatSEK((output.Tt*(1-output.G6)-output.A3)/12));
+        $('.salary #netto_including').text( formatSEK(output.Nt/12));
+
+        updateChart_salary(output);
+	}
+
+	// CHART
+	let chart_salary = new Chart({
+		canvas: document.getElementById('chart_salary'),
+		data: [
+			{ id: 'arbetsgivaravgift', value: 4, color: light_red },
+			{ id: 'kommunalskatt', value: 2, color: red },
+			{ id: 'statlig_skatt', value: 39, color: dark_red },
+			{ id: 'netto', value: 54, color: green },
+		],
+		thickness: 40
+	});
+
+	function updateChart_salary(input) {
+
+		let total = input.A1 + input.A2 + input.A3 + input.Nt;
+		
+		let arbetsgivaravgift = input.A1 / total * 100;
+		let kommunalskatt = input.A2 / total * 100;
+		let statlig_skatt = input.A3 / total * 100;
+		let netto = input.Nt / total * 100;
+
+		chart_salary.updateValues([
+			{ id: 'arbetsgivaravgift', new_value: arbetsgivaravgift, tooltip: formatSEK(input.A1) },
+			{ id: 'kommunalskatt', new_value: kommunalskatt, tooltip: formatSEK(input.A2) },
+			{ id: 'statlig_skatt', new_value: statlig_skatt, tooltip: formatSEK(input.A3) },
+			{ id: 'netto', new_value: netto, tooltip: formatSEK(input.Nt) },
+		]);
+
+	}
+
+</script>
+
+</textarea>
+</body>
+</html>
