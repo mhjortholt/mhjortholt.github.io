@@ -55,6 +55,9 @@ function calculateValues(input) {
 
 	let pensionkostnad_skatt = Pt = P1*G9*12;
 	let statlig_skatt_bil = A5 = G7*(Ttot+B1*12-G3)-A3;
+	if (A5 < 0) {
+		statlig_skatt_bil = A5 = 0;
+	}
 	let skatt_forman_bil = Bt = B1*(G5+G6)*12+A5;
 
 	let lonekostnader = Ltot = Tt+A1+Pt+Bt;
